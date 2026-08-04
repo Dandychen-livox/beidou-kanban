@@ -111,6 +111,9 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 .bd{padding:3px 8px;border-radius:5px;border:1.5px solid #c62828;background:#fff;color:#c62828;cursor:pointer;font-size:12px;font-family:inherit;margin-left:3px}
 .bd:hover{background:#c62828;color:#fff}
 
+.bpub{padding:3px 10px;border-radius:5px;border:1.5px solid #2e7d32;background:#fff;color:#2e7d32;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
+.bpub:hover{background:#2e7d32;color:#fff}
+
 /* Modal */
 .mbg{position:fixed;inset:0;background:rgba(5,15,50,.6);display:none;align-items:center;justify-content:center;z-index:1000}
 .mbg.show{display:flex}
@@ -300,6 +303,33 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
   </div>
 </div>
 
+<!-- 公开填写Modal -->
+<div class="mbg" id="pub-modal">
+  <div class="mbox">
+    <h3 id="pub-title">✏️ 填写事项进展</h3>
+    <input type="hidden" id="pub-id">
+    <div style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1b5e20;margin-bottom:16px">
+      任何参与人均可填写，无需登录
+    </div>
+    <div class="fg">
+      <label>您的姓名</label>
+      <input id="pub-name" placeholder="请输入您的姓名，如：赵云飞">
+    </div>
+    <div class="fg">
+      <label>责任人（如需更新）</label>
+      <input id="pub-person" placeholder="如：赵云飞 或 赵云飞&李建萍，不修改则留空">
+    </div>
+    <div class="fg">
+      <label>进展说明 *</label>
+      <textarea id="pub-progress" rows="4" placeholder="请填写最新进展情况..."></textarea>
+    </div>
+    <div class="mfoot">
+      <button class="bcancel" onclick="closePub()">取消</button>
+      <button class="bsave" style="background:#2e7d32" onclick="savePub()">提交</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -428,8 +458,8 @@ function renderPerson(){
     var m=map[name];
     Object.keys(T).forEach(function(k){T[k]+=m[k];});
     var me=S.role==='person'&&name===S.name;
-    // 有未完成事项的责任人名字显示红色
-    var nameStyle=m.inp>0?'color:#d32f2f;font-weight:700':'font-weight:700';
+    // 只有有逾期事项才标红
+    var nameStyle=m.ov>0?'color:#d32f2f;font-weight:700':'font-weight:700';
     if(me) nameStyle='color:#4a3700;font-weight:700';
     tb.innerHTML+='<tr'+(me?' style="background:#fffde7"':'')+'>'
       +'<td class="tl" style="'+nameStyle+'">'+name+'</td>'
@@ -472,7 +502,7 @@ function renderDetail(){
       :'<span class="sund">● 未完成</span>';
     var eb=canEdit
       ?'<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+(S.role==='admin'?'<button class="bd" onclick="delRow('+row.id+')">🗑</button>':'')
-      :'<span style="color:#ccc;font-size:12px">—</span>';
+      :'<button class="bpub" onclick="openPublic('+row.id+')">✏ 填写</button>';
     var tr=document.createElement('tr');
     if(!show) tr.className='hidden';
     tr.dataset.status=done?'done':'undone';
@@ -497,6 +527,38 @@ function setF(f,btn){
   document.querySelectorAll('.fb').forEach(function(b){b.classList.remove('on');});
   btn.classList.add('on');
   renderDetail();
+}
+
+// 公开填写
+function openPublic(id){
+  var row=null;for(var i=0;i<DATA.length;i++){if(DATA[i].id==id){row=DATA[i];break;}}
+  if(!row) return;
+  document.getElementById('pub-id').value=id;
+  document.getElementById('pub-title').textContent='✏️ 填写进展：'+row.item;
+  document.getElementById('pub-name').value='';
+  document.getElementById('pub-person').value='';
+  document.getElementById('pub-progress').value=row.progress||'';
+  document.getElementById('pub-modal').className='mbg show';
+}
+function closePub(){document.getElementById('pub-modal').className='mbg';}
+function savePub(){
+  var id=document.getElementById('pub-id').value;
+  var name=document.getElementById('pub-name').value.trim();
+  var person=document.getElementById('pub-person').value.trim();
+  var progress=document.getElementById('pub-progress').value.trim();
+  if(!name){showT('请填写您的姓名','err');return;}
+  if(!progress){showT('请填写进展内容','err');return;}
+  var body={progress:progress,caller:name};
+  if(person) body.person=person;
+  fetch('/api/public_update/'+id,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Person':name},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){closePub();showT('提交成功！感谢反馈','ok');load();}
+    else showT(d.msg||'提交失败','err');
+  }).catch(function(){showT('提交失败，请检查网络','err');});
 }
 
 // Modal
@@ -586,6 +648,7 @@ function tick(){
 document.getElementById('iname').onkeydown=function(e){if(e.key==='Enter')loginPerson();};
 document.getElementById('ipw').onkeydown=function(e){if(e.key==='Enter')loginAdmin();};
 document.getElementById('modal').onclick=function(e){if(e.target===this)closeM();};
+document.getElementById('pub-modal').onclick=function(e){if(e.target===this)closePub();};
 </script>
 </body>
 </html>
