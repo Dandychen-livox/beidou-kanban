@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>北斗代理事项闭环看板</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#dce3ef;color:#111;font-size:13px}
+
+/* 登录 */
+#login{position:fixed;inset:0;background:rgba(5,15,50,.82);display:flex;align-items:center;justify-content:center;z-index:999}
+.lbox{background:#fff;border-radius:14px;padding:36px 42px;width:360px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.35)}
+.lbox h2{color:#1a3a8f;font-size:18px;margin-bottom:4px}
+.lbox p{color:#999;font-size:12px;margin-bottom:20px}
+.tabs{display:flex;border:1.5px solid #c5cae9;border-radius:8px;overflow:hidden;margin-bottom:18px}
+.tab{flex:1;padding:8px;border:none;background:#fff;color:#666;cursor:pointer;font-size:13px;font-family:inherit}
+.tab.on{background:#1a3a8f;color:#fff;font-weight:700}
+.linput{width:100%;padding:10px 12px;border:1.5px solid #c5cae9;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:8px;outline:none}
+.linput:focus{border-color:#1a3a8f}
+.lhint{font-size:11px;color:#bbb;text-align:left;margin-bottom:12px}
+.lbtn{width:100%;padding:11px;background:#1a3a8f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.lbtn:hover{background:#122a6e}
+.lerr{color:#c62828;font-size:12px;margin-top:8px;min-height:16px}
+
+/* 主体 */
+#app{display:none;min-height:100vh}
+
+/* 顶栏 */
+.hdr{background:linear-gradient(90deg,#06113a,#1a3a8f);padding:12px 22px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hdr-title{color:#fff;font-size:16px;font-weight:700}
+.badge{padding:2px 11px;border-radius:20px;font-size:12px;font-weight:700}
+.b-admin{background:#ffd54f;color:#3e2700}
+.b-person{background:#a5d6a7;color:#1b5e20}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:14px}
+.hdr-time{color:rgba(255,255,255,.65);font-size:12px}
+.lout{padding:4px 12px;border:1.5px solid rgba(255,255,255,.35);border-radius:14px;background:transparent;color:#fff;cursor:pointer;font-size:12px;font-family:inherit}
+.lout:hover{background:rgba(255,255,255,.15)}
+
+/* 状态栏 */
+.sbar{background:#1a3a8f;padding:6px 22px;display:flex;align-items:center;gap:20px;font-size:12px;color:rgba(255,255,255,.75)}
+.sbar strong{color:#fff}
+.sbar .cd{margin-left:auto;color:rgba(255,255,255,.65)}
+.sbar .cd strong{color:#ffd54f}
+
+/* 区块 */
+.blk{margin:14px 18px 0;border-radius:5px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.blk-hdr{background:#1a3a8f;padding:9px 15px}
+.blk-hdr span{color:#fff;font-size:13px;font-weight:700}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;background:#fff}
+thead tr{background:#1e4a9a}
+th{color:#fff;padding:9px 11px;text-align:center;font-size:12px;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,.1)}
+th.tl{text-align:left}
+.th-exp{background:#1e4a9a}
+tbody tr{border-bottom:1px solid #e5eaf5}
+tbody tr:hover{background:#f2f5ff}
+td{padding:9px 11px;font-size:13px;color:#222;border-right:1px solid #e5eaf5;text-align:center;vertical-align:middle}
+td.tl{text-align:left}
+tr.sum td{background:#edf1fb;font-weight:700;border-top:2px solid #1a3a8f}
+tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
+.red{color:#d32f2f;font-weight:700}
+
+/* 点 */
+.dg{width:13px;height:13px;background:#2e7d32;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px}
+.do{width:11px;height:11px;background:#ef6c00;border-radius:50%;display:inline-block}
+.dr{width:11px;height:11px;background:#c62828;border-radius:50%;display:inline-block}
+.th-dot{display:inline-flex;align-items:center;gap:3px}
+
+/* 工具栏 */
+.tbar{padding:12px 18px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fb{padding:5px 15px;border-radius:15px;border:1.5px solid #b0bcd8;background:#fff;cursor:pointer;font-size:12px;color:#555;font-family:inherit}
+.fb:hover{border-color:#1a3a8f;color:#1a3a8f}
+.fb.on{background:#1a3a8f;color:#fff;border-color:#1a3a8f;font-weight:700}
+.badd{margin-left:auto;padding:6px 16px;background:#2e7d32;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit}
+.badd:hover{background:#1b5e20}
+
+/* 明细表 */
+.dtbl{margin:0 18px 28px;border-radius:5px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.dtbl-hdr{background:#1a3a8f;padding:9px 15px}
+.dtbl-hdr span{color:#fff;font-size:13px;font-weight:700}
+.dt thead th{background:#1e4a9a;color:#fff;padding:9px 11px;text-align:left;font-size:12px;border-right:1px solid rgba(255,255,255,.1);white-space:nowrap}
+.dt td{text-align:left;padding:9px 11px;border-right:1px solid #e5eaf5;border-bottom:1px solid #e5eaf5;font-size:12.5px;vertical-align:top}
+.dt tr:nth-child(even) td{background:#f6f8ff}
+.dt tr:hover td{background:#edf0ff}
+.dt tr.hidden{display:none}
+.iname{font-weight:700;color:#1a237e;line-height:1.5}
+.stxt{white-space:pre-line;font-size:12px;color:#555;line-height:1.6}
+.stxt a{color:#1565c0;text-decoration:none}
+.ptxt{white-space:pre-line;font-size:12px;color:#444;line-height:1.6}
+.umeta{font-size:11px;color:#bbb;margin-top:3px}
+
+/* DDL */
+.dc{display:inline-block;background:#e3f2fd;color:#0d47a1;border-radius:9px;padding:2px 8px;font-size:12px;white-space:nowrap}
+.dn{display:inline-block;background:#e8f5e9;color:#1b5e20;border-radius:9px;padding:2px 8px;font-size:12px;white-space:nowrap}
+.ds{display:inline-block;background:#fff3e0;color:#bf360c;border-radius:9px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.dv{display:inline-block;background:#ffebee;color:#b71c1c;border-radius:9px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+
+/* 责任人 */
+.pc{display:inline-block;background:#ede7f6;color:#4527a0;border-radius:18px;padding:2px 8px;font-size:12px;font-weight:600;margin:1px;white-space:nowrap}
+.pc.me{background:#fff9c4;color:#4a3700}
+
+/* 状态 */
+.sdone{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#2e7d32;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.sund{display:inline-flex;align-items:center;gap:3px;background:#ffebee;color:#c62828;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+
+/* 按钮 */
+.be{padding:3px 10px;border-radius:5px;border:1.5px solid #1a3a8f;background:#fff;color:#1a3a8f;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
+.be:hover{background:#1a3a8f;color:#fff}
+.bd{padding:3px 8px;border-radius:5px;border:1.5px solid #c62828;background:#fff;color:#c62828;cursor:pointer;font-size:12px;font-family:inherit;margin-left:3px}
+.bd:hover{background:#c62828;color:#fff}
+
+/* Modal */
+.mbg{position:fixed;inset:0;background:rgba(5,15,50,.6);display:none;align-items:center;justify-content:center;z-index:1000}
+.mbg.show{display:flex}
+.mbox{background:#fff;border-radius:12px;padding:26px 30px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 6px 30px rgba(0,0,0,.25)}
+.mbox h3{color:#1a3a8f;font-size:15px;margin-bottom:16px}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:12px;color:#666;font-weight:700;margin-bottom:4px}
+.fg input,.fg textarea,.fg select{width:100%;padding:8px 11px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit;outline:none;resize:vertical}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:#1a3a8f}
+.frow{display:flex;gap:11px}
+.frow .fg{flex:1}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.bsave{padding:8px 20px;background:#1a3a8f;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.bsave:hover{background:#122a6e}
+.bcancel{padding:8px 16px;background:#fff;color:#555;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit}
+.bcancel:hover{border-color:#888}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1a3a8f;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;box-shadow:0 3px 14px rgba(0,0,0,.2);transform:translateY(60px);opacity:0;transition:.3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#2e7d32}
+.toast.err{background:#c62828}
+
+.note{margin:0 18px 26px;padding:7px 13px;background:#fffde7;border-left:4px solid #f9a825;border-radius:0 4px 4px 0;font-size:12px;color:#555;line-height:1.9}
+</style>
+</head>
+<body>
+
+<!-- 登录框 -->
+<div id="login">
+  <div class="lbox">
+    <h2>北斗代理事项闭环看板</h2>
+    <p>请选择身份登录</p>
+    <div class="tabs">
+      <button class="tab on" id="t1" onclick="swTab('person')">责任人登录</button>
+      <button class="tab" id="t2" onclick="swTab('admin')">管理员登录</button>
+    </div>
+    <div id="tp">
+      <input id="iname" class="linput" placeholder="输入您的姓名，如：赵云飞">
+      <div class="lhint">仅可编辑您负责的事项进展与状态</div>
+      <button class="lbtn" onclick="loginPerson()">进入看板</button>
+    </div>
+    <div id="ta" style="display:none">
+      <input id="ipw" class="linput" type="password" placeholder="管理员密码">
+      <div class="lhint">可新增、编辑、删除所有事项</div>
+      <button class="lbtn" onclick="loginAdmin()">进入看板</button>
+    </div>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- 主体 -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-title">【待办看板】— 北斗代理事项闭环追踪</div>
+    <span class="badge" id="rbadge"></span>
+    <div class="hdr-r">
+      <span class="hdr-time">最近更新：<strong id="lupd">—</strong> | 每日20:00自动刷新</span>
+      <button class="lout" onclick="doLogout()">退出</button>
+    </div>
+  </div>
+  <div class="sbar">
+    <span>今日：<strong id="today">—</strong></span>
+    <span>距下次更新：<strong id="cd" style="color:#ffd54f">—</strong></span>
+    <span class="cd">下次更新：<strong id="nupd">—</strong></span>
+  </div>
+
+  <!-- 汇总 -->
+  <div class="blk">
+    <div class="blk-hdr"><span>📋 待办闭环汇总</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th class="tl" rowspan="2">事项</th>
+          <th rowspan="2">待办总数</th><th rowspan="2">点状待办</th><th rowspan="2">重点事项</th>
+          <th rowspan="2">已完成</th><th rowspan="2">挂起</th><th rowspan="2">关闭</th><th rowspan="2">进行中</th>
+          <th colspan="3" class="th-exp">进行中待办的到期状态</th>
+        </tr>
+        <tr>
+          <th class="th-exp"><span class="th-dot"><span class="dg">✓</span>正常</span></th>
+          <th class="th-exp"><span class="th-dot"><span class="do"></span>临期</span></th>
+          <th class="th-exp"><span class="th-dot"><span class="dr"></span>逾期</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sum">
+          <td class="tl" style="font-weight:700">待办闭环汇总</td>
+          <td style="font-weight:700" id="s0">—</td>
+          <td id="s1">—</td><td id="s2">—</td><td id="s3">—</td>
+          <td>0</td><td>0</td>
+          <td class="red" id="s4">—</td>
+          <td id="s5">—</td><td id="s6">—</td><td id="s7">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 按责任人 -->
+  <div class="blk" style="margin-top:12px">
+    <div class="blk-hdr"><span>👤 按责任人统计</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th class="tl" rowspan="2">责任人</th>
+          <th rowspan="2">待办总数</th><th rowspan="2">点状待办</th><th rowspan="2">重点事项</th>
+          <th rowspan="2">已完成</th><th rowspan="2">挂起</th><th rowspan="2">关闭</th><th rowspan="2">进行中</th>
+          <th colspan="3" class="th-exp">进行中待办的到期状态</th>
+        </tr>
+        <tr>
+          <th class="th-exp"><span class="th-dot"><span class="dg">✓</span>正常</span></th>
+          <th class="th-exp"><span class="th-dot"><span class="do"></span>临期</span></th>
+          <th class="th-exp"><span class="th-dot"><span class="dr"></span>逾期</span></th>
+        </tr>
+      </thead>
+      <tbody id="ptbody"></tbody>
+    </table>
+  </div>
+
+  <!-- 筛选 -->
+  <div class="tbar">
+    <span style="font-size:12px;color:#555;font-weight:600">筛选：</span>
+    <button class="fb on" onclick="setF('all',this)">全部</button>
+    <button class="fb" onclick="setF('done',this)">✅ 已完成</button>
+    <button class="fb" onclick="setF('undone',this)">🔴 未完成</button>
+    <button class="fb" id="bmine" onclick="setF('mine',this)" style="display:none">👤 我的事项</button>
+    <button class="badd" id="badd" onclick="openAdd()" style="display:none">＋ 新增事项</button>
+  </div>
+
+  <!-- 明细 -->
+  <div class="dtbl">
+    <div class="dtbl-hdr"><span>📄 事项明细</span></div>
+    <table class="dt">
+      <thead>
+        <tr>
+          <th style="width:38px;text-align:center">序号</th>
+          <th style="min-width:140px">事项</th>
+          <th style="min-width:200px">提交内容／要求</th>
+          <th style="width:105px;text-align:center">DDL</th>
+          <th style="width:95px;text-align:center">责任人</th>
+          <th style="min-width:190px">进展</th>
+          <th style="width:86px;text-align:center">闭环状态</th>
+          <th style="width:92px;text-align:center">Livox确认</th>
+          <th style="width:105px;text-align:center">操作</th>
+        </tr>
+      </thead>
+      <tbody id="dtbody"></tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    【说明】<strong>点状待办</strong>：无明确DDL或周期性事项 ｜ <strong>重点事项</strong>：有明确截止日期 ｜ <strong>临期</strong>：距DDL≤3天 ｜ <strong>逾期</strong>：已超过DDL未完成
+  </div>
+</div>
+
+<!-- 编辑Modal -->
+<div class="mbg" id="modal">
+  <div class="mbox">
+    <h3 id="mtitle">编辑事项</h3>
+    <input type="hidden" id="eid">
+    <div id="aonly">
+      <div class="fg"><label>事项名称 *</label><input id="ei" placeholder="事项名称"></div>
+      <div class="frow">
+        <div class="fg"><label>责任人</label><input id="ep" placeholder="如：赵云飞 或 赵云飞&李建萍"></div>
+        <div class="fg"><label>LIVOX对接人</label><input id="el" placeholder="如：Dandy"></div>
+      </div>
+      <div class="fg"><label>提交内容／要求</label><textarea id="es" rows="3"></textarea></div>
+      <div class="frow">
+        <div class="fg"><label>DDL</label><input id="ed" placeholder="如：2026-08-15 或 每月更新"></div>
+        <div class="fg"><label>提交物链接</label><input id="eu" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="fg"><label>进展说明</label><textarea id="epg" rows="3" placeholder="填写最新进展..."></textarea></div>
+    <div class="frow">
+      <div class="fg">
+        <label>闭环状态（责任人填写）</label>
+        <select id="est"><option value="未完成">● 未完成</option><option value="完成">✓ 完成</option></select>
+      </div>
+      <div class="fg" id="lc-field">
+        <label>Livox确认（管理员确认）</label>
+        <select id="elc"><option value="未完成">● 未完成</option><option value="完成">✓ 完成</option></select>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="bcancel" onclick="closeM()">取消</button>
+      <button class="bsave" onclick="saveM()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var S={role:null,name:'',token:''};
+var DATA=[];
+var FIL='all';
+
+// 登录
+function swTab(t){
+  document.getElementById('t1').className='tab'+(t==='person'?' on':'');
+  document.getElementById('t2').className='tab'+(t==='admin'?' on':'');
+  document.getElementById('tp').style.display=t==='person'?'':'none';
+  document.getElementById('ta').style.display=t==='admin'?'':'none';
+  document.getElementById('lerr').textContent='';
+}
+function loginPerson(){
+  var n=document.getElementById('iname').value.trim();
+  if(!n){document.getElementById('lerr').textContent='请输入姓名';return;}
+  S={role:'person',name:n,token:''};enter();
+}
+function loginAdmin(){
+  var pw=document.getElementById('ipw').value;
+  fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){S={role:'admin',name:'管理员',token:d.token};enter();}
+    else{document.getElementById('lerr').textContent=d.msg||'密码错误';}
+  }).catch(function(){document.getElementById('lerr').textContent='连接失败';});
+}
+function enter(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  var b=document.getElementById('rbadge');
+  if(S.role==='admin'){
+    b.textContent='管理员';b.className='badge b-admin';
+    document.getElementById('badd').style.display='';
+  } else {
+    b.textContent='👤 '+S.name;b.className='badge b-person';
+    document.getElementById('bmine').style.display='';
+  }
+  load();
+  setInterval(load,30000);
+  setInterval(tick,1000);tick();
+}
+function doLogout(){
+  S={role:null,name:'',token:''};
+  document.getElementById('login').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('iname').value='';
+  document.getElementById('ipw').value='';
+}
+
+// 数据
+function load(){
+  fetch('/api/data').then(function(r){return r.json();}).then(function(d){
+    DATA=d;
+    var now=new Date();
+    document.getElementById('lupd').textContent=now.getFullYear()+'-'+p2(now.getMonth()+1)+'-'+p2(now.getDate())+' '+p2(now.getHours())+':'+p2(now.getMinutes());
+    renderSum();renderPerson();renderDetail();
+  }).catch(function(e){showT('数据加载失败','err');});
+}
+
+function ddlT(ddl,status){
+  if(!ddl||ddl==='None'||ddl==='') return 'c';
+  if(/每|周|月/.test(ddl)) return 'c';
+  var d=new Date(ddl);if(isNaN(d.getTime())) return 'c';
+  if(status==='完成') return 'n';
+  var diff=Math.floor((d-new Date().setHours(0,0,0,0))/86400000);
+  if(diff<0) return 'v';
+  if(diff<=3) return 's';
+  return 'n';
+}
+function ddlTag(ddl,status){
+  var t=ddlT(ddl,status);
+  var label=(!ddl||ddl==='None')?'—':ddl;
+  var cls={c:'dc',n:'dn',s:'ds',v:'dv'}[t];
+  var ico={c:'',n:'',s:'⏰ ',v:'△ '}[t];
+  return '<span class="'+cls+'">'+ico+label+'</span>';
+}
+function ps(s){
+  if(!s||s==='—') return ['—'];
+  return s.split(/[&\/、,，]/).map(function(p){return p.trim();}).filter(Boolean);
+}
+function isMine(row){return ps(row.person).indexOf(S.name)>=0;}
+
+// 统计
+// 完成判断：必须 status=完成 AND livox_confirm=完成
+function isDone(row){
+  return row.status==='完成' && row.livox_confirm==='完成';
+}
+
+function calcSt(rows){
+  var r={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+  rows.forEach(function(row){
+    r.total++;
+    var t=ddlT(row.ddl,row.status);
+    if(t==='c') r.pt++; else r.key++;
+    if(isDone(row)) r.done++;
+    else{r.inp++;if(t==='v')r.ov++;else if(t==='s')r.sn++;else r.nm++;}
+  });
+  return r;
+}
+
+function renderSum(){
+  var st=calcSt(DATA);
+  var ids=['s0','s1','s2','s3','s4','s5','s6','s7'];
+  var vals=[st.total,st.pt,st.key,st.done,st.inp,st.nm,st.sn,st.ov];
+  ids.forEach(function(id,i){document.getElementById(id).textContent=vals[i];});
+}
+
+function renderPerson(){
+  var map={};
+  DATA.forEach(function(row){
+    var t=ddlT(row.ddl,row.status);
+    ps(row.person).forEach(function(name){
+      if(!map[name]) map[name]={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+      var m=map[name];m.total++;
+      if(t==='c') m.pt++; else m.key++;
+      if(isDone(row)) m.done++;
+      else{m.inp++;if(t==='v')m.ov++;else if(t==='s')m.sn++;else m.nm++;}
+    });
+  });
+  var tb=document.getElementById('ptbody');tb.innerHTML='';
+  var T={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+  Object.keys(map).sort().forEach(function(name){
+    var m=map[name];
+    Object.keys(T).forEach(function(k){T[k]+=m[k];});
+    var me=S.role==='person'&&name===S.name;
+    // 有未完成事项的责任人名字显示红色
+    var nameStyle=m.inp>0?'color:#d32f2f;font-weight:700':'font-weight:700';
+    if(me) nameStyle='color:#4a3700;font-weight:700';
+    tb.innerHTML+='<tr'+(me?' style="background:#fffde7"':'')+'>'
+      +'<td class="tl" style="'+nameStyle+'">'+name+'</td>'
+      +'<td>'+m.total+'</td><td>'+m.pt+'</td><td>'+m.key+'</td>'
+      +'<td>'+m.done+'</td><td>0</td><td>0</td>'
+      +'<td class="red">'+m.inp+'</td>'
+      +'<td>'+m.nm+'</td><td>'+m.sn+'</td><td>'+m.ov+'</td>'
+      +'</tr>';
+  });
+  tb.innerHTML+='<tr class="tot">'
+    +'<td class="tl" style="font-weight:700">合计</td>'
+    +'<td style="font-weight:700">'+T.total+'</td><td>'+T.pt+'</td><td>'+T.key+'</td>'
+    +'<td>'+T.done+'</td><td>0</td><td>0</td>'
+    +'<td class="red">'+T.inp+'</td>'
+    +'<td>'+T.nm+'</td><td>'+T.sn+'</td><td>'+T.ov+'</td>'
+    +'</tr>';
+}
+
+function linkify(s){
+  return (s||'').replace(/https?:\/\/[^\s\n]+/g,function(u){return '<a href="'+u+'" target="_blank">🔗查看链接</a>';});
+}
+
+function renderDetail(){
+  var tb=document.getElementById('dtbody');tb.innerHTML='';
+  DATA.forEach(function(row){
+    var done=isDone(row);                          // 必须livox确认才算完成
+    var personDone=row.status==='完成';            // 责任人自己标的完成
+    var mine=isMine(row);
+    var canEdit=S.role==='admin'||mine;
+    var show=FIL==='all'||(FIL==='done'&&done)||(FIL==='undone'&&!done)||(FIL==='mine'&&mine);
+    var ph=ps(row.person).map(function(p){
+      return '<span class="pc'+(S.role==='person'&&p===S.name?' me':'')+'">'+p+'</span>';
+    }).join(' ');
+    // 闭环状态（责任人填写）
+    var sh=personDone?'<span class="sdone">✓ 完成</span>':'<span class="sund">● 未完成</span>';
+    // Livox确认列
+    var lc=row.livox_confirm||'未完成';
+    var lcHtml=lc==='完成'
+      ?'<span class="sdone">✓ 完成</span>'
+      :'<span class="sund">● 未完成</span>';
+    var eb=canEdit
+      ?'<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+(S.role==='admin'?'<button class="bd" onclick="delRow('+row.id+')">🗑</button>':'')
+      :'<span style="color:#ccc;font-size:12px">—</span>';
+    var tr=document.createElement('tr');
+    if(!show) tr.className='hidden';
+    tr.dataset.status=done?'done':'undone';
+    tr.dataset.mine=mine?'1':'0';
+    tr.innerHTML='<td style="text-align:center;font-weight:700;color:#1565c0">'+row.id+'</td>'
+      +'<td><div class="iname">'+row.item+'</div></td>'
+      +'<td><div class="stxt">'+linkify(row.submit)+'</div></td>'
+      +'<td style="text-align:center">'+ddlTag(row.ddl,row.status)+'</td>'
+      +'<td style="text-align:center">'+ph+'</td>'
+      +'<td><div class="ptxt">'+(row.progress||'<span style="color:#bbb">暂无进展</span>')+'</div>'
+      +(row.updated_at?'<div class="umeta">更新：'+row.updated_at+(row.updated_by?' by '+row.updated_by:'')+'</div>':'')
+      +'</td>'
+      +'<td style="text-align:center">'+sh+'</td>'
+      +'<td style="text-align:center">'+lcHtml+'</td>'
+      +'<td style="text-align:center">'+eb+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function setF(f,btn){
+  FIL=f;
+  document.querySelectorAll('.fb').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  renderDetail();
+}
+
+// Modal
+function openEdit(id){
+  var row=null;for(var i=0;i<DATA.length;i++){if(DATA[i].id==id){row=DATA[i];break;}}
+  if(!row) return;
+  document.getElementById('eid').value=id;
+  document.getElementById('mtitle').textContent='✏️ 编辑：'+row.item;
+  document.getElementById('epg').value=row.progress||'';
+  document.getElementById('est').value=row.status||'未完成';
+  document.getElementById('elc').value=row.livox_confirm||'未完成';
+  var adm=S.role==='admin';
+  document.getElementById('aonly').style.display=adm?'':'none';
+  // Livox确认仅管理员可见
+  document.getElementById('lc-field').style.display=adm?'':'none';
+  if(adm){
+    document.getElementById('ei').value=row.item||'';
+    document.getElementById('ep').value=row.person||'';
+    document.getElementById('el').value=row.livox||'';
+    document.getElementById('es').value=row.submit||'';
+    document.getElementById('ed').value=row.ddl||'';
+    document.getElementById('eu').value=row.submit_url||'';
+  }
+  document.getElementById('modal').className='mbg show';
+}
+function openAdd(){
+  document.getElementById('eid').value='';
+  document.getElementById('mtitle').textContent='＋ 新增事项';
+  document.getElementById('aonly').style.display='';
+  document.getElementById('lc-field').style.display='';
+  ['ei','ep','el','es','ed','eu','epg'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('est').value='未完成';
+  document.getElementById('elc').value='未完成';
+  document.getElementById('modal').className='mbg show';
+}
+function closeM(){document.getElementById('modal').className='mbg';}
+function saveM(){
+  var id=document.getElementById('eid').value;
+  var adm=S.role==='admin';
+  var body={progress:document.getElementById('epg').value,status:document.getElementById('est').value};
+  if(adm) Object.assign(body,{
+    item:document.getElementById('ei').value,
+    person:document.getElementById('ep').value,
+    livox:document.getElementById('el').value,
+    submit:document.getElementById('es').value,
+    ddl:document.getElementById('ed').value,
+    submit_url:document.getElementById('eu').value,
+    livox_confirm:document.getElementById('elc').value
+  });
+  // 责任人也可提交livox_confirm（仅管理员界面有此字段，但接口允许）
+  var hdrs={'Content-Type':'application/json','X-Person':S.name};
+  if(adm) hdrs['X-Admin-Token']=S.token;
+  var url=id?('/api/update/'+id):'/api/add';
+  fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify(body)})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.ok){closeM();showT('保存成功','ok');load();}
+    else showT(d.msg||'保存失败','err');
+  }).catch(function(){showT('请求失败','err');});
+}
+function delRow(id){
+  if(!confirm('确认删除该事项？')) return;
+  fetch('/api/delete/'+id,{method:'DELETE',headers:{'X-Admin-Token':S.token}})
+  .then(function(r){return r.json();})
+  .then(function(d){if(d.ok){showT('已删除','ok');load();}else showT('删除失败','err');});
+}
+
+// Toast & 时钟
+function showT(msg,type){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+(type||'');
+  setTimeout(function(){el.className='toast';},2800);
+}
+function p2(n){return String(n).padStart(2,'0');}
+function tick(){
+  var now=new Date();
+  document.getElementById('today').textContent=now.getFullYear()+'-'+p2(now.getMonth()+1)+'-'+p2(now.getDate());
+  var next=new Date(now);next.setHours(20,0,0,0);
+  if(now>=next) next.setDate(next.getDate()+1);
+  document.getElementById('nupd').textContent=next.getFullYear()+'-'+p2(next.getMonth()+1)+'-'+p2(next.getDate())+' 20:00';
+  var diff=next-now;
+  var hh=Math.floor(diff/3600000),mm=Math.floor((diff%3600000)/60000),ss=Math.floor((diff%60000)/1000);
+  document.getElementById('cd').textContent=p2(hh)+':'+p2(mm)+':'+p2(ss);
+}
+
+// 回车触发
+document.getElementById('iname').onkeydown=function(e){if(e.key==='Enter')loginPerson();};
+document.getElementById('ipw').onkeydown=function(e){if(e.key==='Enter')loginAdmin();};
+document.getElementById('modal').onclick=function(e){if(e.target===this)closeM();};
+</script>
+</body>
+</html>
