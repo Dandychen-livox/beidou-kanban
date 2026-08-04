@@ -47,7 +47,29 @@ def api_auth():
         return jsonify({'ok': True, 'token': ADMIN_PASSWORD})
     return jsonify({'ok': False, 'msg': '密码错误'}), 401
 
-@app.route('/api/update/<int:row_id>', methods=['POST'])
+@app.route('/api/public_update/<int:row_id>', methods=['POST'])
+def api_public_update(row_id):
+    """公开编辑接口：任何人可填写 person / progress，无需登录"""
+    body   = request.get_json(force=True) or {}
+    caller = request.headers.get('X-Person', '').strip() or body.get('caller','匿名')
+    # 只允许修改这两个字段
+    allowed = {k:v for k,v in body.items() if k in ('person','progress')}
+    if not allowed:
+        abort(400)
+    with _lock:
+        rows = read_data()
+        idx  = next((i for i,r in enumerate(rows) if str(r.get('id'))==str(row_id)), None)
+        if idx is None: abort(404)
+        row = rows[idx]
+        row.update(allowed)
+        row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+        row['updated_by'] = caller
+        rows[idx] = row
+        write_data(rows)
+    return jsonify({'ok': True, 'row': row})
+
+
+
 def api_update(row_id):
     body   = request.get_json(force=True) or {}
     admin  = is_admin(request)
