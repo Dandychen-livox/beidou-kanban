@@ -53,7 +53,7 @@ def api_public_update(row_id):
     body   = request.get_json(force=True) or {}
     caller = request.headers.get('X-Person', '').strip() or body.get('caller','匿名')
     # 只允许修改这两个字段
-    allowed = {k:v for k,v in body.items() if k in ('person','progress')}
+    allowed = {k:v for k,v in body.items() if k in ('person','progress','submit_url')}
     if not allowed:
         abort(400)
     with _lock:
