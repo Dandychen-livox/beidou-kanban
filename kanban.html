@@ -321,15 +321,15 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <h3 id="pub-title">✏️ 填写事项进展</h3>
     <input type="hidden" id="pub-id">
     <div style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1b5e20;margin-bottom:16px">
-      任何参与人均可填写，无需登录
+      无需登录，任何参与人均可填写进展或认领责任
     </div>
     <div class="fg">
-      <label>您的姓名</label>
+      <label>您的姓名 *</label>
       <input id="pub-name" placeholder="请输入您的姓名，如：赵云飞">
     </div>
     <div class="fg">
-      <label>责任人（如需更新）</label>
-      <input id="pub-person" placeholder="如：赵云飞 或 赵云飞&李建萍，不修改则留空">
+      <label>认领/更新责任人（填写即认领，不填则保持原责任人）</label>
+      <input id="pub-person" placeholder="填写您的名字即可认领此事项，多人用&分隔">
     </div>
     <div class="fg">
       <label>进展说明 *</label>
@@ -552,9 +552,13 @@ function renderDetail(){
     var lcHtml=lc==='完成'?'<span class="sdone">✓ 完成</span>'
       :lc==='挂起'?'<span class="shold">⏸ 挂起</span>'
       :'<span class="sund">● 未完成</span>';
-    var eb=canEdit
-      ?'<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+(S.role==='admin'?'<button class="bd" onclick="delRow('+row.id+')">🗑</button>':'')
-      :'<button class="bpub" onclick="openPublic('+row.id+')">✏ 填写</button>';
+    // 操作列：始终显示「✏ 填写」；管理员额外显示「编辑」和「删除」
+    var eb='<button class="bpub" onclick="openPublic('+row.id+')">✏ 填写</button>';
+    if(S.role==='admin'){
+      eb='<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'
+        +'<button class="bd" onclick="delRow('+row.id+')">🗑</button>'
+        +'<br><button class="bpub" style="margin-top:3px" onclick="openPublic('+row.id+')">✏ 填写</button>';
+    }
     var tr=document.createElement('tr');
     if(!show) tr.className='hidden';
     tr.dataset.status=done?'done':'undone';
