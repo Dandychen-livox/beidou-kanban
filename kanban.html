@@ -142,18 +142,20 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 </head>
 <body>
 
-<!-- 登录框 -->
-<div id="login">
+  <div id="login">
   <div class="lbox">
     <h2>北斗代理事项闭环看板</h2>
-    <p>请选择身份登录</p>
+    <p>登录后可编辑事项 · 游客可直接关闭查看</p>
+    <div style="text-align:right;margin-bottom:8px">
+      <button onclick="skipLogin()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:12px;font-family:inherit">跳过，直接查看 ✕</button>
+    </div>
     <div class="tabs">
       <button class="tab on" id="t1" onclick="swTab('person')">责任人登录</button>
       <button class="tab" id="t2" onclick="swTab('admin')">管理员登录</button>
     </div>
     <div id="tp">
       <input id="iname" class="linput" placeholder="输入您的姓名，如：赵云飞">
-      <div class="lhint">仅可编辑您负责的事项进展与状态</div>
+      <div class="lhint">登录后可编辑您负责的事项进展与状态</div>
       <button class="lbtn" onclick="loginPerson()">进入看板</button>
     </div>
     <div id="ta" style="display:none">
@@ -172,7 +174,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <span class="badge" id="rbadge"></span>
     <div class="hdr-r">
       <span class="hdr-time">最近更新：<strong id="lupd">—</strong> | 每日20:00自动刷新</span>
-      <button class="lout" onclick="doLogout()">退出</button>
+      <button class="lout" id="login-btn" onclick="showLogin()">登录</button>
     </div>
   </div>
   <div class="sbar">
@@ -364,27 +366,41 @@ function loginAdmin(){
     else{document.getElementById('lerr').textContent=d.msg||'密码错误';}
   }).catch(function(){document.getElementById('lerr').textContent='连接失败';});
 }
+function showLogin(){
+  document.getElementById('lerr').textContent='';
+  document.getElementById('login').style.display='flex';
+}
 function enter(){
   document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
   var b=document.getElementById('rbadge');
+  var btn=document.getElementById('login-btn');
   if(S.role==='admin'){
     b.textContent='管理员';b.className='badge b-admin';
+    b.style.background='';b.style.color='';
     document.getElementById('badd').style.display='';
+    document.getElementById('bmine').style.display='none';
+    btn.textContent='退出';btn.onclick=doLogout;
   } else {
     b.textContent='👤 '+S.name;b.className='badge b-person';
+    b.style.background='';b.style.color='';
     document.getElementById('bmine').style.display='';
+    document.getElementById('badd').style.display='none';
+    btn.textContent='退出';btn.onclick=doLogout;
   }
-  load();
-  setInterval(load,30000);
-  setInterval(tick,1000);tick();
+  renderDetail();
+}
+function skipLogin(){
+  document.getElementById('login').style.display='none';
 }
 function doLogout(){
   S={role:null,name:'',token:''};
-  document.getElementById('login').style.display='flex';
-  document.getElementById('app').style.display='none';
-  document.getElementById('iname').value='';
-  document.getElementById('ipw').value='';
+  // 退出后重置为游客状态
+  var b=document.getElementById('rbadge');
+  b.textContent='游客';b.className='badge';
+  b.style.background='#e0e0e0';b.style.color='#555';
+  document.getElementById('badd').style.display='none';
+  document.getElementById('bmine').style.display='none';
+  renderDetail();
 }
 
 // 数据
@@ -657,6 +673,18 @@ document.getElementById('iname').onkeydown=function(e){if(e.key==='Enter')loginP
 document.getElementById('ipw').onkeydown=function(e){if(e.key==='Enter')loginAdmin();};
 document.getElementById('modal').onclick=function(e){if(e.target===this)closeM();};
 document.getElementById('pub-modal').onclick=function(e){if(e.target===this)closePub();};
+
+// 页面加载时：显示看板（游客模式），登录弹窗悬浮可跳过
+document.getElementById('app').style.display='block';
+// 初始化游客徽标
+var _b=document.getElementById('rbadge');
+_b.textContent='游客';_b.style.background='#546e7a';_b.style.color='#fff';
+// 游客模式不显示管理员按钮
+document.getElementById('badd').style.display='none';
+document.getElementById('bmine').style.display='none';
+load();
+setInterval(load,30000);
+setInterval(tick,1000);tick();
 </script>
 </body>
 </html>
