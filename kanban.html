@@ -104,6 +104,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 /* 状态 */
 .sdone{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#2e7d32;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
 .sund{display:inline-flex;align-items:center;gap:3px;background:#ffebee;color:#c62828;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.shold{display:inline-flex;align-items:center;gap:3px;background:#fff8e1;color:#f57f17;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
 
 /* 按钮 */
 .be{padding:3px 10px;border-radius:5px;border:1.5px solid #1a3a8f;background:#fff;color:#1a3a8f;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
@@ -205,9 +206,9 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
           <td class="tl" style="font-weight:700">待办闭环汇总</td>
           <td style="font-weight:700" id="s0">—</td>
           <td id="s1">—</td><td id="s2">—</td><td id="s3">—</td>
-          <td>0</td><td>0</td>
-          <td class="red" id="s4">—</td>
-          <td id="s5">—</td><td id="s6">—</td><td id="s7">—</td>
+          <td id="s4">—</td><td>0</td>
+          <td class="red" id="s6">—</td>
+          <td id="s7">—</td><td id="s8">—</td><td id="s9">—</td>
         </tr>
       </tbody>
     </table>
@@ -292,11 +293,19 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <div class="frow">
       <div class="fg">
         <label>闭环状态（责任人填写）</label>
-        <select id="est"><option value="未完成">● 未完成</option><option value="完成">✓ 完成</option></select>
+        <select id="est">
+          <option value="未完成">● 未完成</option>
+          <option value="完成">✓ 完成</option>
+          <option value="挂起">⏸ 挂起</option>
+        </select>
       </div>
       <div class="fg" id="lc-field">
         <label>Livox确认（管理员确认）</label>
-        <select id="elc"><option value="未完成">● 未完成</option><option value="完成">✓ 完成</option></select>
+        <select id="elc">
+          <option value="未完成">● 未完成</option>
+          <option value="完成">✓ 完成</option>
+          <option value="挂起">⏸ 挂起</option>
+        </select>
       </div>
     </div>
     <div class="mfoot">
@@ -329,6 +338,15 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <div class="fg">
       <label>提交物（文档链接 / 具体方案）</label>
       <input id="pub-url" placeholder="如：https://docs.xxx.com/... 或填写方案名称">
+    </div>
+    <div class="fg">
+      <label>闭环状态（可选）</label>
+      <select id="pub-status">
+        <option value="">— 不修改 —</option>
+        <option value="未完成">● 未完成</option>
+        <option value="完成">✓ 完成</option>
+        <option value="挂起">⏸ 挂起</option>
+      </select>
     </div>
     <div class="mfoot">
       <button class="bcancel" onclick="closePub()">取消</button>
@@ -441,14 +459,18 @@ function isMine(row){return ps(row.person).indexOf(S.name)>=0;}
 function isDone(row){
   return row.status==='完成' && row.livox_confirm==='完成';
 }
+function isHold(row){
+  return row.status==='挂起';
+}
 
 function calcSt(rows){
-  var r={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+  var r={total:0,pt:0,key:0,done:0,hold:0,inp:0,nm:0,sn:0,ov:0};
   rows.forEach(function(row){
     r.total++;
     var t=ddlT(row.ddl,row.status);
     if(t==='c') r.pt++; else r.key++;
     if(isDone(row)) r.done++;
+    else if(isHold(row)) r.hold++;
     else{r.inp++;if(t==='v')r.ov++;else if(t==='s')r.sn++;else r.nm++;}
   });
   return r;
@@ -456,9 +478,16 @@ function calcSt(rows){
 
 function renderSum(){
   var st=calcSt(DATA);
-  var ids=['s0','s1','s2','s3','s4','s5','s6','s7'];
-  var vals=[st.total,st.pt,st.key,st.done,st.inp,st.nm,st.sn,st.ov];
-  ids.forEach(function(id,i){document.getElementById(id).textContent=vals[i];});
+  document.getElementById('s0').textContent=st.total;
+  document.getElementById('s1').textContent=st.pt;
+  document.getElementById('s2').textContent=st.key;
+  document.getElementById('s3').textContent=st.done;
+  document.getElementById('s4').textContent=st.hold;
+  document.getElementById('s5').textContent=0; // 关闭
+  document.getElementById('s6').textContent=st.inp;
+  document.getElementById('s7').textContent=st.nm;
+  document.getElementById('s8').textContent=st.sn;
+  document.getElementById('s9').textContent=st.ov;
 }
 
 function renderPerson(){
@@ -466,26 +495,26 @@ function renderPerson(){
   DATA.forEach(function(row){
     var t=ddlT(row.ddl,row.status);
     ps(row.person).forEach(function(name){
-      if(!map[name]) map[name]={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+      if(!map[name]) map[name]={total:0,pt:0,key:0,done:0,hold:0,inp:0,nm:0,sn:0,ov:0};
       var m=map[name];m.total++;
       if(t==='c') m.pt++; else m.key++;
       if(isDone(row)) m.done++;
+      else if(isHold(row)) m.hold++;
       else{m.inp++;if(t==='v')m.ov++;else if(t==='s')m.sn++;else m.nm++;}
     });
   });
   var tb=document.getElementById('ptbody');tb.innerHTML='';
-  var T={total:0,pt:0,key:0,done:0,inp:0,nm:0,sn:0,ov:0};
+  var T={total:0,pt:0,key:0,done:0,hold:0,inp:0,nm:0,sn:0,ov:0};
   Object.keys(map).sort().forEach(function(name){
     var m=map[name];
     Object.keys(T).forEach(function(k){T[k]+=m[k];});
     var me=S.role==='person'&&name===S.name;
-    // 只有有逾期事项才标红
     var nameStyle=m.ov>0?'color:#d32f2f;font-weight:700':'font-weight:700';
     if(me) nameStyle='color:#4a3700;font-weight:700';
     tb.innerHTML+='<tr'+(me?' style="background:#fffde7"':'')+'>'
       +'<td class="tl" style="'+nameStyle+'">'+name+'</td>'
       +'<td>'+m.total+'</td><td>'+m.pt+'</td><td>'+m.key+'</td>'
-      +'<td>'+m.done+'</td><td>0</td><td>0</td>'
+      +'<td>'+m.done+'</td><td>'+m.hold+'</td><td>0</td>'
       +'<td class="red">'+m.inp+'</td>'
       +'<td>'+m.nm+'</td><td>'+m.sn+'</td><td>'+m.ov+'</td>'
       +'</tr>';
@@ -493,7 +522,7 @@ function renderPerson(){
   tb.innerHTML+='<tr class="tot">'
     +'<td class="tl" style="font-weight:700">合计</td>'
     +'<td style="font-weight:700">'+T.total+'</td><td>'+T.pt+'</td><td>'+T.key+'</td>'
-    +'<td>'+T.done+'</td><td>0</td><td>0</td>'
+    +'<td>'+T.done+'</td><td>'+T.hold+'</td><td>0</td>'
     +'<td class="red">'+T.inp+'</td>'
     +'<td>'+T.nm+'</td><td>'+T.sn+'</td><td>'+T.ov+'</td>'
     +'</tr>';
@@ -515,11 +544,13 @@ function renderDetail(){
       return '<span class="pc'+(S.role==='person'&&p===S.name?' me':'')+'">'+p+'</span>';
     }).join(' ');
     // 闭环状态（责任人填写）
-    var sh=personDone?'<span class="sdone">✓ 完成</span>':'<span class="sund">● 未完成</span>';
+    var sh=row.status==='完成'?'<span class="sdone">✓ 完成</span>'
+      :row.status==='挂起'?'<span class="shold">⏸ 挂起</span>'
+      :'<span class="sund">● 未完成</span>';
     // Livox确认列
     var lc=row.livox_confirm||'未完成';
-    var lcHtml=lc==='完成'
-      ?'<span class="sdone">✓ 完成</span>'
+    var lcHtml=lc==='完成'?'<span class="sdone">✓ 完成</span>'
+      :lc==='挂起'?'<span class="shold">⏸ 挂起</span>'
       :'<span class="sund">● 未完成</span>';
     var eb=canEdit
       ?'<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+(S.role==='admin'?'<button class="bd" onclick="delRow('+row.id+')">🗑</button>':'')
@@ -569,11 +600,13 @@ function savePub(){
   var person=document.getElementById('pub-person').value.trim();
   var progress=document.getElementById('pub-progress').value.trim();
   var url=document.getElementById('pub-url').value.trim();
+  var status=document.getElementById('pub-status').value;
   if(!name){showT('请填写您的姓名','err');return;}
   if(!progress){showT('请填写进展内容','err');return;}
   var body={progress:progress,caller:name};
   if(person) body.person=person;
   if(url) body.submit_url=url;
+  if(status) body.status=status;
   fetch('/api/public_update/'+id,{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Person':name},
