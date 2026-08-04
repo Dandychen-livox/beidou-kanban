@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, Response, abort, send_file
 from pathlib import Path
 from datetime import datetime
 import json, re, threading, os, io, base64
+from urllib.parse import unquote
 
 BASE           = Path(__file__).parent
 DATA           = BASE / 'data.json'
@@ -54,6 +55,16 @@ def add_log(operator, action, item_id=None, item_name=None, detail=None):
     except Exception:
         pass
 
+def get_caller(req, body=None):
+    """安全获取调用者姓名，处理URL编码的中文"""
+    raw = req.headers.get('X-Person', '')
+    if not raw and body:
+        raw = body.get('caller', '')
+    try:
+        return unquote(raw).strip() or '匿名'
+    except Exception:
+        return raw.strip() or '匿名'
+
 def is_admin(req):
     return req.headers.get('X-Admin-Token') == ADMIN_PASSWORD
 
@@ -90,7 +101,7 @@ def api_log():
 @app.route('/api/public_update/<int:row_id>', methods=['POST'])
 def api_public_update(row_id):
     body   = request.get_json(force=True) or {}
-    caller = (request.headers.get('X-Person', '') or body.get('caller', '匿名')).strip()
+    caller = get_caller(request, body)
     allowed = {k: v for k, v in body.items() if k in ('person', 'progress', 'submit_url', 'status')}
     if not allowed: abort(400)
     with _lock:
@@ -115,7 +126,7 @@ def api_public_update(row_id):
 def api_update(row_id):
     body   = request.get_json(force=True) or {}
     admin  = is_admin(request)
-    caller = request.headers.get('X-Person', '').strip()
+    caller = get_caller(request)
     with _lock:
         rows = read_data()
         idx  = next((i for i, r in enumerate(rows) if str(r.get('id')) == str(row_id)), None)
