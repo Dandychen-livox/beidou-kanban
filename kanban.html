@@ -254,6 +254,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
           <th style="width:105px;text-align:center">DDL</th>
           <th style="width:95px;text-align:center">责任人</th>
           <th style="min-width:190px">进展</th>
+          <th style="width:130px">提交物</th>
           <th style="width:86px;text-align:center">闭环状态</th>
           <th style="width:92px;text-align:center">Livox确认</th>
           <th style="width:105px;text-align:center">操作</th>
@@ -322,6 +323,10 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <div class="fg">
       <label>进展说明 *</label>
       <textarea id="pub-progress" rows="4" placeholder="请填写最新进展情况..."></textarea>
+    </div>
+    <div class="fg">
+      <label>提交物（文档链接 / 具体方案）</label>
+      <input id="pub-url" placeholder="如：https://docs.xxx.com/... 或填写方案名称">
     </div>
     <div class="mfoot">
       <button class="bcancel" onclick="closePub()">取消</button>
@@ -515,6 +520,7 @@ function renderDetail(){
       +'<td><div class="ptxt">'+(row.progress||'<span style="color:#bbb">暂无进展</span>')+'</div>'
       +(row.updated_at?'<div class="umeta">更新：'+row.updated_at+(row.updated_by?' by '+row.updated_by:'')+'</div>':'')
       +'</td>'
+      +'<td>'+(row.submit_url?linkify(row.submit_url):'<span style="color:#bbb;font-size:12px">—</span>')+'</td>'
       +'<td style="text-align:center">'+sh+'</td>'
       +'<td style="text-align:center">'+lcHtml+'</td>'
       +'<td style="text-align:center">'+eb+'</td>';
@@ -546,10 +552,12 @@ function savePub(){
   var name=document.getElementById('pub-name').value.trim();
   var person=document.getElementById('pub-person').value.trim();
   var progress=document.getElementById('pub-progress').value.trim();
+  var url=document.getElementById('pub-url').value.trim();
   if(!name){showT('请填写您的姓名','err');return;}
   if(!progress){showT('请填写进展内容','err');return;}
   var body={progress:progress,caller:name};
   if(person) body.person=person;
+  if(url) body.submit_url=url;
   fetch('/api/public_update/'+id,{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Person':name},
