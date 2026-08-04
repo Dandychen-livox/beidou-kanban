@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>北斗代理事项闭环看板</title>
-<!-- build: 2026-08-04 15:05:51 -->
+<!-- build: 2026-08-04 15:16:31 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#dce3ef;color:#111;font-size:13px}
@@ -846,6 +846,67 @@ function tick(){
   document.getElementById('cd').textContent=p2(hh)+':'+p2(mm)+':'+p2(ss);
 }
 
+// ── 操作日志 ──────────────────────────────────────
+var _allLogs = [];
+
+function openLog(){
+  document.getElementById('log-search').value='';
+  document.getElementById('log-action-filter').value='';
+  document.getElementById('log-modal').className='log-modal show';
+  fetchLog();
+}
+function closeLog(){
+  document.getElementById('log-modal').className='log-modal';
+}
+function fetchLog(){
+  fetch('/api/log',{headers:{'X-Admin-Token':S.token}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    _allLogs = Array.isArray(d) ? d : [];
+    renderLog();
+  }).catch(function(){
+    document.getElementById('log-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#c62828;padding:20px">日志加载失败</td></tr>';
+  });
+}
+function renderLog(){
+  var kw  = (document.getElementById('log-search').value||'').trim().toLowerCase();
+  var act = document.getElementById('log-action-filter').value;
+  var rows = _allLogs.filter(function(r){
+    if(act && r.action !== act) return false;
+    if(kw && !(
+      (r.operator||'').toLowerCase().includes(kw) ||
+      (r.item_name||'').toLowerCase().includes(kw) ||
+      (r.detail||'').toLowerCase().includes(kw)
+    )) return false;
+    return true;
+  });
+  document.getElementById('log-count').textContent = '共 '+rows.length+' 条';
+  var tb = document.getElementById('log-tbody');
+  var empty = document.getElementById('log-empty');
+  if(!rows.length){
+    tb.innerHTML='';
+    empty.style.display='';
+    return;
+  }
+  empty.style.display='none';
+  var actionClass = {
+    '公开填写':'log-action-pub','编辑事项':'log-action-edit',
+    '新增事项':'log-action-add','删除事项':'log-action-del',
+    '批量导入':'log-action-add','登录':'log-action-login'
+  };
+  tb.innerHTML = rows.map(function(r){
+    var cls = actionClass[r.action] || 'log-action-edit';
+    return '<tr>'
+      +'<td style="white-space:nowrap">'+r.time+'</td>'
+      +'<td><strong>'+r.operator+'</strong></td>'
+      +'<td><span class="'+cls+'">'+r.action+'</span></td>'
+      +'<td style="text-align:center">'+(r.item_id||'—')+'</td>'
+      +'<td>'+(r.item_name||'—')+'</td>'
+      +'<td style="color:#555">'+(r.detail||'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
 // ── 模板下载 ──────────────────────────────────────
 function downloadTemplate(){
   var a = document.createElement('a');
@@ -954,6 +1015,8 @@ function showUploadResult(msg, ok){
 document.getElementById('iname').onkeydown=function(e){if(e.key==='Enter')loginPerson();};
 document.getElementById('ipw').onkeydown=function(e){if(e.key==='Enter')loginAdmin();};
 document.getElementById('modal').onclick=function(e){if(e.target===this)closeM();};
+document.getElementById('log-modal').onclick=function(e){if(e.target===this)closeLog();};
+document.getElementById('batch-modal').onclick=function(e){if(e.target===this)closeBatch();};
 document.getElementById('pub-modal').onclick=function(e){if(e.target===this)closePub();};
 
 // 页面加载时：显示看板（游客模式），登录弹窗悬浮可跳过
