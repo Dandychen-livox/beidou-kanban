@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>北斗代理事项闭环看板</title>
-<!-- build: 2026-08-04 17:07:24 -->
+<!-- build: 2026-08-04 17:32:35 -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#dce3ef;color:#111;font-size:13px;min-height:100vh}
@@ -687,7 +687,7 @@ function saveM() {
       livox_confirm: document.getElementById('elc').value
     });
   }
-  var hdrs = {'Content-Type':'application/json','X-Person':S.name};
+  var hdrs = {'Content-Type':'application/json','X-Person':encodeURIComponent(S.name)};
   if (adm) hdrs['X-Admin-Token'] = S.token;
   var url = id ? ('/api/update/'+id) : '/api/add';
   fetch(url, {method:'POST', headers:hdrs, body:JSON.stringify(body)})
@@ -729,7 +729,7 @@ function savePub() {
   if (person) body.person = person;
   if (url)    body.submit_url = url;
   if (status) body.status = status;
-  fetch('/api/public_update/'+id, {method:'POST', headers:{'Content-Type':'application/json','X-Person':name}, body:JSON.stringify(body)})
+  fetch('/api/public_update/'+id, {method:'POST', headers:{'Content-Type':'application/json','X-Person':encodeURIComponent(name)}, body:JSON.stringify(body)})
   .then(function(r){return r.json();})
   .then(function(d){ if(d.ok){closePub();showT('提交成功！','ok');load();} else showT(d.msg||'提交失败','err'); })
   .catch(function(){ showT('提交失败，请检查网络','err'); });
