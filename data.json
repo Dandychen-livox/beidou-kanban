@@ -173,20 +173,5 @@
     "livox_confirm": "未完成",
     "updated_at": "2026-08-05 02:11",
     "updated_by": "管理员"
-  },
-  {
-    "id": 14,
-    "date": "2026-08-07",
-    "item": "同步测试-可删除",
-    "submit": "",
-    "ddl": "",
-    "person": "test",
-    "livox": "Dandy",
-    "progress": "",
-    "submit_url": "",
-    "status": "未完成",
-    "livox_confirm": "未完成",
-    "updated_at": "2026-08-07 06:36",
-    "updated_by": "管理员"
   }
 ]
