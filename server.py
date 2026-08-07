@@ -12,7 +12,11 @@ LOG_FILE       = BASE / 'oplog.json'
 BACKUP         = BASE / 'backup'
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'livox2026')
 TEMPLATE_FILE  = BASE / 'template.xlsx'
-_lock          = threading.Lock()
+# GitHub 自动同步配置（在 Render 环境变量中设置）
+GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
+GITHUB_REPO  = os.environ.get('GITHUB_REPO', 'Dandychen-livox/beidou-kanban')
+_lock        = threading.Lock()
+_sync_lock   = threading.Lock()   # 防止并发 push
 
 app = Flask(__name__, static_folder=str(BASE), static_url_path='')
 
@@ -27,6 +31,43 @@ def write_data(rows):
     (BACKUP / f'data_{ts}.json').write_text(
         json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
     DATA.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
+    # 异步同步到 GitHub（不阻塞请求）
+    threading.Thread(target=_sync_to_github, daemon=True).start()
+
+def _sync_to_github():
+    """将 data.json 推送到 GitHub，防止 Render 重启丢数据"""
+    if not GITHUB_TOKEN:
+        return  # 未配置 Token 则跳过
+    try:
+        import urllib.request, urllib.error
+        with _sync_lock:
+            content_raw = DATA.read_bytes()
+            content_b64 = base64.b64encode(content_raw).decode()
+            api_url = f'https://api.github.com/repos/{GITHUB_REPO}/contents/data.json'
+            # 先获取当前 SHA
+            req = urllib.request.Request(api_url)
+            req.add_header('Authorization', f'token {GITHUB_TOKEN}')
+            req.add_header('Accept', 'application/vnd.github.v3+json')
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    info = json.loads(r.read())
+                sha = info.get('sha', '')
+            except Exception:
+                sha = ''
+            # 推送
+            body = json.dumps({
+                'message': f'Auto-sync data.json {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',
+                'content': content_b64,
+                'sha': sha
+            }).encode()
+            req2 = urllib.request.Request(api_url, data=body, method='PUT')
+            req2.add_header('Authorization', f'token {GITHUB_TOKEN}')
+            req2.add_header('Content-Type', 'application/json')
+            req2.add_header('Accept', 'application/vnd.github.v3+json')
+            with urllib.request.urlopen(req2, timeout=15) as r:
+                pass  # 成功
+    except Exception:
+        pass  # 同步失败不影响主流程
 
 # ── 操作日志 ──
 def read_log():
