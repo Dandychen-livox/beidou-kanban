@@ -128,5 +128,50 @@
     "submit_url": "https://www.kdocs.cn/l/chcPb0L1SJnl",
     "status": "完成",
     "livox_confirm": "完成"
+  },
+  {
+    "id": 11,
+    "date": "2026-08-05",
+    "item": "Mid-360L专题销售工具提交",
+    "submit": "1.Mid-360L对外客户演示材料（需要Livox确认）\n2.对销售-四个行业雷达应用场景&客户画像（机器狗与人形、手持测绘、AGV/AMR、商汤）",
+    "ddl": "2026-08-07",
+    "person": "杨翔",
+    "livox": "Dandy",
+    "progress": "暂无进展",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-05 02:04",
+    "updated_by": "管理员"
+  },
+  {
+    "id": 12,
+    "date": "2026-08-05",
+    "item": "Mid-360L专题-考试安排反馈",
+    "submit": "1.考试产品品\n2.考试结果反馈",
+    "ddl": "2026-08-07",
+    "person": "赵云飞",
+    "livox": "Dandy",
+    "progress": "暂无进展",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-05 02:09",
+    "updated_by": "管理员"
+  },
+  {
+    "id": 13,
+    "date": "2026-08-05",
+    "item": "Mid-360L专题-世界机器人大会展会准备",
+    "submit": "1.客户展会：邀请机器人客户合作展金产品展出，客户机器人产品展出-7月24日\n2.展会邀请客户+招待客户：确认世界机器人大会参展，万家鱼、机器人公司谈单，确定走访优先级-8月7日\n3.Leads：输出展会期间LEADS清单-8月27日\n4.总结报告：在公开线上报道和现场走访交流拍照，整理机器人大会期间各大厂商（客户、友商）主推的未来技术趋势和展会亮点，与客户Leads一起形成《参展总结报告》-9月10日",
+    "ddl": "2026-08-07",
+    "person": "杨海月",
+    "livox": "Dandy",
+    "progress": "暂无进展",
+    "submit_url": "https://drive.weixin.qq.com/s?k=ACAAAEAcQAAc11f6voz",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-05 02:11",
+    "updated_by": "管理员"
   }
 ]
