@@ -46,12 +46,12 @@
     "ddl": "2026-07-24",
     "person": "杨海月",
     "livox": "Dandy/卓玟",
-    "progress": "配送小车/机器狗/人形（宇树）",
+    "progress": "客户邀约完成；产品借到机器狗和小车，租用宇树的G1。",
     "submit_url": "",
-    "status": "未完成",
+    "status": "完成",
     "livox_confirm": "未完成",
-    "updated_at": "2026-08-10 09:43",
-    "updated_by": "杨朔"
+    "updated_at": "2026-08-21 08:38",
+    "updated_by": "杨海月"
   },
   {
     "id": 5,
@@ -139,12 +139,12 @@
     "ddl": "2026-08-07",
     "person": "杨翔",
     "livox": "Dandy",
-    "progress": "已提供",
+    "progress": "暂无进展",
     "submit_url": "",
     "status": "未完成",
     "livox_confirm": "未完成",
-    "updated_at": "2026-08-10 09:41",
-    "updated_by": "杨朔"
+    "updated_at": "2026-08-05 02:04",
+    "updated_by": "管理员"
   },
   {
     "id": 12,
@@ -154,12 +154,12 @@
     "ddl": "2026-08-07",
     "person": "赵云飞",
     "livox": "Dandy",
-    "progress": "已经完成题库，并与livox同步，由人事同事近期安排线上考试。",
+    "progress": "暂无进展",
     "submit_url": "",
     "status": "未完成",
     "livox_confirm": "未完成",
-    "updated_at": "2026-08-10 09:44",
-    "updated_by": "杨朔"
+    "updated_at": "2026-08-05 02:09",
+    "updated_by": "管理员"
   },
   {
     "id": 13,
@@ -169,11 +169,11 @@
     "ddl": "2026-08-07",
     "person": "杨海月",
     "livox": "Dandy",
-    "progress": "进行中",
+    "progress": "暂无进展",
     "submit_url": "https://drive.weixin.qq.com/s?k=ACAAAEAcQAAc11f6voz",
     "status": "未完成",
     "livox_confirm": "未完成",
-    "updated_at": "2026-08-10 09:45",
-    "updated_by": "杨朔"
+    "updated_at": "2026-08-05 02:11",
+    "updated_by": "管理员"
   }
 ]
