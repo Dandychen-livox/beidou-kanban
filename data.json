@@ -188,5 +188,20 @@
     "livox_confirm": "未完成",
     "updated_at": "2026-08-31 08:22",
     "updated_by": "管理员"
+  },
+  {
+    "id": 15,
+    "date": "2026-08-31",
+    "item": "预测规则更新方案",
+    "submit": "1.为了体现实际需求情况，对于预测规则改善方案",
+    "ddl": "2026-09-02",
+    "person": "周培云/陈铭亮",
+    "livox": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-31 08:24",
+    "updated_by": "管理员"
   }
 ]
