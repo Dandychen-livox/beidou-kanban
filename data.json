@@ -203,5 +203,20 @@
     "livox_confirm": "未完成",
     "updated_at": "2026-08-31 08:24",
     "updated_by": "管理员"
+  },
+  {
+    "id": 16,
+    "date": "2026-08-31",
+    "item": "预测更新（更新流速以及安全库存方案）",
+    "submit": "",
+    "ddl": "2026年8月31日",
+    "person": "陈铭亮",
+    "livox": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-31 08:25",
+    "updated_by": "管理员"
   }
 ]
