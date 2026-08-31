@@ -233,5 +233,20 @@
     "livox_confirm": "未完成",
     "updated_at": "2026-08-31 08:30",
     "updated_by": "管理员"
+  },
+  {
+    "id": 18,
+    "date": "2026-08-31",
+    "item": "世界机器人大会参展总结报告+线索",
+    "submit": "",
+    "ddl": "",
+    "person": "",
+    "livox": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "updated_at": "2026-08-31 08:31",
+    "updated_by": "管理员"
   }
 ]
