@@ -32,42 +32,80 @@ def write_data(rows):
         json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
     DATA.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
     # 异步同步到 GitHub（不阻塞请求）
-    threading.Thread(target=_sync_to_github, daemon=True).start()
+    threading.Thread(target=lambda: _sync_file_to_github(DATA, 'data.json'), daemon=True).start()
 
-def _sync_to_github():
-    """将 data.json 推送到 GitHub，防止 Render 重启丢数据"""
+# ── GitHub 双向同步（Render 免费版磁盘为临时磁盘，休眠/重启后本地文件会被重置为
+#    上一次部署镜像内打包的旧数据；因此必须做到：启动时从 GitHub 拉取最新数据
+#    写回本地，每次写入后再把本地最新数据推回 GitHub，才能保证数据不丢失） ──
+
+def _github_get(path):
+    """读取 GitHub 仓库中某文件的内容与 sha，失败返回 (None, '')"""
+    import urllib.request
+    api_url = f'https://api.github.com/repos/{GITHUB_REPO}/contents/{path}'
+    req = urllib.request.Request(api_url)
+    req.add_header('Authorization', f'token {GITHUB_TOKEN}')
+    req.add_header('Accept', 'application/vnd.github.v3+json')
+    with urllib.request.urlopen(req, timeout=10) as r:
+        info = json.loads(r.read())
+    content = base64.b64decode(info['content'])
+    return content, info.get('sha', '')
+
+def _github_put(path, content_bytes, sha, message):
+    import urllib.request
+    api_url = f'https://api.github.com/repos/{GITHUB_REPO}/contents/{path}'
+    body = json.dumps({
+        'message': message,
+        'content': base64.b64encode(content_bytes).decode(),
+        'sha': sha
+    }).encode()
+    req = urllib.request.Request(api_url, data=body, method='PUT')
+    req.add_header('Authorization', f'token {GITHUB_TOKEN}')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('Accept', 'application/vnd.github.v3+json')
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.status
+
+def _sync_file_to_github(local_path, github_path):
+    """把本地文件推送到 GitHub（每次写入后异步调用，不阻塞请求）"""
     if not GITHUB_TOKEN:
-        return  # 未配置 Token 则跳过
+        return
     try:
-        import urllib.request, urllib.error
         with _sync_lock:
-            content_raw = DATA.read_bytes()
-            content_b64 = base64.b64encode(content_raw).decode()
-            api_url = f'https://api.github.com/repos/{GITHUB_REPO}/contents/data.json'
-            # 先获取当前 SHA
-            req = urllib.request.Request(api_url)
-            req.add_header('Authorization', f'token {GITHUB_TOKEN}')
-            req.add_header('Accept', 'application/vnd.github.v3+json')
+            content_raw = local_path.read_bytes()
             try:
-                with urllib.request.urlopen(req, timeout=10) as r:
-                    info = json.loads(r.read())
-                sha = info.get('sha', '')
+                _, sha = _github_get(github_path)
             except Exception:
                 sha = ''
-            # 推送
-            body = json.dumps({
-                'message': f'Auto-sync data.json {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',
-                'content': content_b64,
-                'sha': sha
-            }).encode()
-            req2 = urllib.request.Request(api_url, data=body, method='PUT')
-            req2.add_header('Authorization', f'token {GITHUB_TOKEN}')
-            req2.add_header('Content-Type', 'application/json')
-            req2.add_header('Accept', 'application/vnd.github.v3+json')
-            with urllib.request.urlopen(req2, timeout=15) as r:
-                pass  # 成功
-    except Exception:
-        pass  # 同步失败不影响主流程
+            msg = f'Auto-sync {github_path} {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+            try:
+                _github_put(github_path, content_raw, sha, msg)
+            except Exception as e:
+                # sha 可能因并发写入而过期，重试一次
+                try:
+                    _, sha2 = _github_get(github_path)
+                    _github_put(github_path, content_raw, sha2, msg)
+                except Exception as e2:
+                    print(f'[sync-to-github] 推送 {github_path} 失败：{e2}', flush=True)
+    except Exception as e:
+        print(f'[sync-to-github] 推送 {github_path} 异常：{e}', flush=True)
+
+def _sync_file_from_github(local_path, github_path):
+    """启动时从 GitHub 拉取最新文件覆盖本地（GitHub 才是持久化的数据源，
+       本地磁盘随时可能因 Render 重启/休眠被重置为旧的部署快照）"""
+    if not GITHUB_TOKEN:
+        print(f'[sync-from-github] 未配置 GITHUB_TOKEN，跳过拉取 {github_path}，使用本地文件', flush=True)
+        return
+    try:
+        content, _ = _github_get(github_path)
+        rows = json.loads(content.decode('utf-8'))  # 校验 JSON 合法
+        local_path.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
+        print(f'[sync-from-github] 启动拉取 {github_path} 成功，共 {len(rows)} 条', flush=True)
+    except Exception as e:
+        print(f'[sync-from-github] 启动拉取 {github_path} 失败，使用本地文件：{e}', flush=True)
+
+# 服务启动时立即从 GitHub 拉取最新数据（在任何请求处理之前执行）
+_sync_file_from_github(DATA, 'data.json')
+_sync_file_from_github(LOG_FILE, 'oplog.json')
 
 # ── 操作日志 ──
 def read_log():
@@ -82,6 +120,7 @@ def write_log(entry):
     logs.append(entry)
     logs = logs[-500:]
     LOG_FILE.write_text(json.dumps(logs, ensure_ascii=False, indent=2), encoding='utf-8')
+    threading.Thread(target=lambda: _sync_file_to_github(LOG_FILE, 'oplog.json'), daemon=True).start()
 
 def add_log(operator, action, item_id=None, item_name=None, detail=None):
     try:
