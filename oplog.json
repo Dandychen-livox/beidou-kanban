@@ -14,5 +14,13 @@
     "item_id": 14,
     "item_name": "分货方案-北斗",
     "detail": "进展:已经提交；状态→完成"
+  },
+  {
+    "time": "2026-09-18 10:03:21",
+    "operator": "Dandy.chen",
+    "action": "公开填写",
+    "item_id": 15,
+    "item_name": "预测规则更新方案",
+    "detail": "进展:已经更新完成；状态→完成"
   }
 ]
