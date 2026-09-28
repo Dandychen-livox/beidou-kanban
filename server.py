@@ -148,6 +148,44 @@ def get_caller(req, body=None):
 def is_admin(req):
     return req.headers.get('X-Admin-Token') == ADMIN_PASSWORD
 
+# ── 优先级 / 完成时间 ──
+PRIORITIES = ('高', '中', '低')
+
+def norm_priority(v):
+    return v if v in PRIORITIES else '中'
+
+def apply_completion_state(row):
+    """维护 completed_at：状态与Livox确认双重变为“完成”时记录完成时间，
+       任一方离开“完成”则清空，供前端判断“完成超过一周”是否默认隐藏"""
+    done = row.get('status') == '完成' and row.get('livox_confirm') == '完成'
+    if done:
+        if not row.get('completed_at'):
+            row['completed_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    else:
+        row['completed_at'] = ''
+
+def _migrate_data():
+    """兼容旧数据：补齐 priority / completed_at 字段（旧的已完成事项用 updated_at 作为完成时间近似值）"""
+    rows = read_data()
+    changed = False
+    for row in rows:
+        if row.get('priority') not in PRIORITIES:
+            row['priority'] = '中'
+            changed = True
+        done = row.get('status') == '完成' and row.get('livox_confirm') == '完成'
+        if done:
+            if not row.get('completed_at'):
+                row['completed_at'] = row.get('updated_at') or datetime.now().strftime('%Y-%m-%d %H:%M')
+                changed = True
+        elif row.get('completed_at'):
+            row['completed_at'] = ''
+            changed = True
+    if changed:
+        write_data(rows)
+        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at 字段', flush=True)
+
+_migrate_data()
+
 # ── 路由 ──
 
 @app.route('/')
@@ -182,8 +220,9 @@ def api_log():
 def api_public_update(row_id):
     body   = request.get_json(force=True) or {}
     caller = get_caller(request, body)
-    allowed = {k: v for k, v in body.items() if k in ('person', 'progress', 'submit_url', 'status')}
+    allowed = {k: v for k, v in body.items() if k in ('person', 'progress', 'submit_url', 'status', 'priority')}
     if not allowed: abort(400)
+    if 'priority' in allowed: allowed['priority'] = norm_priority(allowed['priority'])
     with _lock:
         rows = read_data()
         idx  = next((i for i, r in enumerate(rows) if str(r.get('id')) == str(row_id)), None)
@@ -192,12 +231,14 @@ def api_public_update(row_id):
         row.update(allowed)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         row['updated_by'] = caller
+        apply_completion_state(row)
         rows[idx] = row
         write_data(rows)
     parts = []
     if 'progress'   in allowed: parts.append('进展:' + allowed['progress'][:30])
     if 'person'     in allowed: parts.append('责任人→' + allowed['person'])
     if 'status'     in allowed: parts.append('状态→' + allowed['status'])
+    if 'priority'   in allowed: parts.append('优先级→' + allowed['priority'])
     if 'submit_url' in allowed: parts.append('提交物:' + allowed['submit_url'][:30])
     add_log(caller, '公开填写', row_id, row.get('item', '')[:20], '；'.join(parts))
     return jsonify({'ok': True, 'row': row})
@@ -215,10 +256,12 @@ def api_update(row_id):
         if not admin:
             ps = [p.strip() for p in re.split(r'[&/、,，]', row.get('person', '')) if p.strip()]
             if caller not in ps: abort(403)
-            body = {k: v for k, v in body.items() if k in ('progress', 'status', 'livox_confirm')}
+            body = {k: v for k, v in body.items() if k in ('progress', 'status', 'livox_confirm', 'priority')}
+        if 'priority' in body: body['priority'] = norm_priority(body['priority'])
         row.update(body)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         row['updated_by'] = caller or ('管理员' if admin else '?')
+        apply_completion_state(row)
         rows[idx] = row
         write_data(rows)
     parts = []
@@ -226,6 +269,7 @@ def api_update(row_id):
     if 'status'        in body: parts.append('状态→' + body['status'])
     if 'livox_confirm' in body: parts.append('Livox确认→' + body['livox_confirm'])
     if 'person'        in body: parts.append('责任人→' + body['person'])
+    if 'priority'      in body: parts.append('优先级→' + body['priority'])
     add_log('管理员' if admin else caller, '编辑事项', row_id, row.get('item', '')[:20], '；'.join(parts))
     return jsonify({'ok': True, 'row': row})
 
@@ -244,10 +288,12 @@ def api_add():
             'ddl':          body.get('ddl', ''),
             'person':       body.get('person', ''),
             'livox':        body.get('livox', 'Dandy'),
+            'priority':     norm_priority(body.get('priority', '中')),
             'progress':     '',
             'submit_url':   body.get('submit_url', ''),
             'status':       '未完成',
             'livox_confirm':'未完成',
+            'completed_at': '',
             'updated_at':   datetime.now().strftime('%Y-%m-%d %H:%M'),
             'updated_by':   '管理员'
         }
@@ -280,8 +326,8 @@ def api_template():
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = '事项明细'
-        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人', '进展', '提交物链接', '闭环状态']
-        notes   = ['必填', '提交要求', '如：2026-08-15或每月更新', '如：赵云飞', '如：Dandy', '进展说明', 'https://...', '未完成/完成/挂起']
+        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人', '优先级', '进展', '提交物链接', '闭环状态']
+        notes   = ['必填', '提交要求', '如：2026-08-15或每月更新', '如：赵云飞', '如：Dandy', '高/中/低，留空默认中', '进展说明', 'https://...', '未完成/完成/挂起']
         for i, (h, n) in enumerate(zip(headers, notes), 1):
             ws.cell(1, i, h)
             ws.cell(2, i, n)
@@ -335,6 +381,7 @@ def _parse_excel(stream):
         'DDL': 'ddl', '截止日期': 'ddl',
         '责任人': 'person',
         'LIVOX对接人': 'livox', 'Livox对接人': 'livox',
+        '优先级': 'priority',
         '进展': 'progress',
         '提交物链接': 'submit_url', '提交物': 'submit_url',
         '闭环状态': 'status', '状态': 'status',
@@ -365,9 +412,11 @@ def _do_batch(items):
                 'id': cur_id, 'date': datetime.now().strftime('%Y-%m-%d'),
                 'item': item.get('item', ''), 'submit': item.get('submit', ''),
                 'ddl':  item.get('ddl', ''),  'person': item.get('person', ''),
-                'livox': item.get('livox', 'Dandy'), 'progress': item.get('progress', ''),
+                'livox': item.get('livox', 'Dandy'), 'priority': norm_priority(item.get('priority', '中')),
+                'progress': item.get('progress', ''),
                 'submit_url': item.get('submit_url', ''), 'status': status,
                 'livox_confirm': '未完成',
+                'completed_at': '',
                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
                 'updated_by': '管理员(批量导入)',
             }

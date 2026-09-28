@@ -98,6 +98,12 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 .sdone{display:inline-flex;align-items:center;gap:3px;background:#e8f5e9;color:#2e7d32;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
 .sund{display:inline-flex;align-items:center;gap:3px;background:#ffebee;color:#c62828;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
 .shold{display:inline-flex;align-items:center;gap:3px;background:#fff8e1;color:#f57f17;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.pri-high{display:inline-flex;align-items:center;gap:3px;background:#ffebee;color:#c62828;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.pri-mid{display:inline-flex;align-items:center;gap:3px;background:#fff3e0;color:#e65100;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.pri-low{display:inline-flex;align-items:center;gap:3px;background:#eceff1;color:#546e7a;border-radius:9px;padding:3px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.btn-set{padding:4px 12px;border:1.5px solid rgba(255,255,255,.5);border-radius:14px;background:transparent;color:#fff;cursor:pointer;font-size:12px;font-family:inherit}
+.btn-set:hover{background:rgba(255,255,255,.15)}
+.btn-set.on{background:#ffd54f;color:#3e2700;border-color:#ffd54f;font-weight:700}
 .be{padding:3px 10px;border-radius:5px;border:1.5px solid #1a3a8f;background:#fff;color:#1a3a8f;cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
 .be:hover{background:#1a3a8f;color:#fff}
 .bd{padding:3px 8px;border-radius:5px;border:1.5px solid #c62828;background:#fff;color:#c62828;cursor:pointer;font-size:12px;font-family:inherit;margin-left:3px}
@@ -197,6 +203,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <span class="badge b-guest" id="rbadge">游客</span>
     <div class="hdr-r">
       <span class="hdr-time">最近更新：<strong id="lupd">—</strong></span>
+      <button class="btn-set" id="btn-toggle-old" onclick="toggleOldDone()">⚙ 显示全部已完成</button>
       <button class="btn-log" id="btn-log" onclick="openLog()" style="display:none">📋 操作日志</button>
       <button class="lout" id="login-btn" onclick="showLogin()">登录</button>
     </div>
@@ -270,12 +277,13 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 
   <!-- 明细 -->
   <div class="dtbl">
-    <div class="dtbl-hdr"><span>📄 事项明细</span></div>
+    <div class="dtbl-hdr"><span>📄 事项明细</span> <span id="hide-hint" style="font-size:11px;color:#c5cfe8;font-weight:400;margin-left:10px"></span></div>
     <table class="dt">
       <thead>
         <tr>
           <th style="width:38px;text-align:center">序号</th>
           <th style="min-width:140px">事项</th>
+          <th style="width:64px;text-align:center">优先级</th>
           <th style="min-width:200px">提交内容／要求</th>
           <th style="width:105px;text-align:center">DDL</th>
           <th style="width:95px;text-align:center">责任人</th>
@@ -306,8 +314,12 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <div class="fg"><label>提交内容／要求</label><textarea id="es" rows="3"></textarea></div>
       <div class="frow">
         <div class="fg"><label>DDL</label><input id="ed" placeholder="如：2026-08-15 或 每月更新"></div>
-        <div class="fg"><label>提交物链接</label><input id="eu" placeholder="https://..."></div>
+        <div class="fg">
+          <label>优先级</label>
+          <select id="epr"><option value="高">🔴 高</option><option value="中">🟡 中</option><option value="低">🟢 低</option></select>
+        </div>
       </div>
+      <div class="fg"><label>提交物链接</label><input id="eu" placeholder="https://..."></div>
     </div>
     <div class="fg"><label>进展说明</label><textarea id="epg" rows="3" placeholder="填写最新进展..."></textarea></div>
     <div class="frow">
@@ -371,7 +383,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <div style="font-size:12px;color:#555;margin-bottom:6px">预览：共 <strong id="preview-count">0</strong> 条</div>
       <div class="preview-scroll">
         <table class="ptable">
-          <thead><tr><th>#</th><th>事项名称</th><th>DDL</th><th>责任人</th><th>状态</th></tr></thead>
+          <thead><tr><th>#</th><th>事项名称</th><th>DDL</th><th>责任人</th><th>优先级</th><th>状态</th></tr></thead>
           <tbody id="preview-tbody"></tbody>
         </table>
       </div>
@@ -418,7 +430,8 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 <div class="toast" id="toast"></div>
 
 <script>
-var S = {role:null, name:'', token:''};
+var S = {role:null, name:'', token:'', showAllDone:false};
+try { S.showAllDone = localStorage.getItem('kanban_showAllDone')==='1'; } catch(e){}
 var DATA = [];
 var FIL = 'all';
 var _allLogs = [];
@@ -442,7 +455,7 @@ function showLogin() {
 function loginPerson() {
   var n = document.getElementById('iname').value.trim();
   if (!n) { document.getElementById('lerr').textContent = '请输入姓名'; return; }
-  S = {role:'person', name:n, token:''};
+  S = {role:'person', name:n, token:'', showAllDone:S.showAllDone};
   enter();
 }
 function loginAdmin() {
@@ -450,7 +463,7 @@ function loginAdmin() {
   fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})})
   .then(function(r){return r.json();})
   .then(function(d){
-    if (d.ok) { S = {role:'admin', name:'管理员', token:d.token}; enter(); }
+    if (d.ok) { S = {role:'admin', name:'管理员', token:d.token, showAllDone:S.showAllDone}; enter(); }
     else { document.getElementById('lerr').textContent = d.msg || '密码错误'; }
   }).catch(function(){ document.getElementById('lerr').textContent = '连接失败'; });
 }
@@ -478,7 +491,7 @@ function enter() {
   renderDetail();
 }
 function doLogout() {
-  S = {role:null, name:'', token:''};
+  S = {role:null, name:'', token:'', showAllDone:S.showAllDone};
   var b = document.getElementById('rbadge');
   b.textContent = '游客'; b.className = 'badge b-guest';
   var btn = document.getElementById('login-btn');
@@ -526,6 +539,29 @@ function ps(s) {
 function isMine(row) { return ps(row.person).indexOf(S.name) >= 0; }
 function isDone(row) { return row.status==='完成' && row.livox_confirm==='完成'; }
 function isHold(row) { return row.status==='挂起'; }
+function priorityOf(row) { return (row.priority==='高'||row.priority==='低') ? row.priority : '中'; }
+function priTag(row) {
+  var p = priorityOf(row);
+  var cls = p==='高' ? 'pri-high' : (p==='低' ? 'pri-low' : 'pri-mid');
+  var ico = p==='高' ? '🔴' : (p==='低' ? '🟢' : '🟡');
+  return '<span class="'+cls+'">'+ico+' '+p+'</span>';
+}
+function isOldDone(row) {
+  if (!isDone(row)) return false;
+  var ref = row.completed_at || row.updated_at;
+  if (!ref) return false;
+  var d = new Date(ref.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return false;
+  return (new Date() - d) > 7*86400000;
+}
+function toggleOldDone() {
+  S.showAllDone = !S.showAllDone;
+  try { localStorage.setItem('kanban_showAllDone', S.showAllDone ? '1' : '0'); } catch(e){}
+  var btn = document.getElementById('btn-toggle-old');
+  btn.textContent = S.showAllDone ? '⚙ 隐藏旧的已完成事项' : '⚙ 显示全部已完成';
+  btn.classList.toggle('on', S.showAllDone);
+  renderDetail();
+}
 
 /* ─── 统计 ─── */
 function calcSt(rows) {
@@ -594,11 +630,14 @@ function linkify(s) {
 function renderDetail() {
   var tb = document.getElementById('dtbody');
   tb.innerHTML = '';
+  var hiddenOld = 0;
   DATA.forEach(function(row) {
     var done = isDone(row);
     var mine = isMine(row);
     var canEdit = S.role==='admin' || mine;
     var show = FIL==='all' || (FIL==='done'&&done) || (FIL==='undone'&&!done) || (FIL==='mine'&&mine);
+    var oldDone = isOldDone(row);
+    if (show && oldDone && !S.showAllDone) { show = false; hiddenOld++; }
     var ph = ps(row.person).map(function(p){
       return '<span class="pc'+(S.role==='person'&&p===S.name?' me':'')+'">'+p+'</span>';
     }).join(' ');
@@ -623,6 +662,7 @@ function renderDetail() {
     tr.innerHTML =
       '<td style="text-align:center;font-weight:700;color:#1565c0">'+row.id+'</td>'+
       '<td><div class="iname">'+row.item+'</div></td>'+
+      '<td style="text-align:center">'+priTag(row)+'</td>'+
       '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
       '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
       '<td style="text-align:center">'+ph+'</td>'+
@@ -634,6 +674,8 @@ function renderDetail() {
       '<td style="text-align:center">'+eb+'</td>';
     tb.appendChild(tr);
   });
+  var hint = document.getElementById('hide-hint');
+  hint.textContent = (hiddenOld>0 && !S.showAllDone) ? ('（已隐藏 '+hiddenOld+' 条完成超过一周的事项，点击右上角"⚙ 显示全部已完成"查看）') : '';
 }
 function setF(f, btn) {
   FIL = f;
@@ -661,6 +703,7 @@ function openEdit(id) {
     document.getElementById('es').value = row.submit || '';
     document.getElementById('ed').value = row.ddl    || '';
     document.getElementById('eu').value = row.submit_url || '';
+    document.getElementById('epr').value = priorityOf(row);
   }
   document.getElementById('modal').className = 'mbg show';
 }
@@ -672,6 +715,7 @@ function openAdd() {
   ['ei','ep','el','es','ed','eu','epg'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('est').value = '未完成';
   document.getElementById('elc').value = '未完成';
+  document.getElementById('epr').value = '中';
   document.getElementById('modal').className = 'mbg show';
 }
 function closeM() { document.getElementById('modal').className = 'mbg'; }
@@ -684,7 +728,8 @@ function saveM() {
       item: document.getElementById('ei').value, person: document.getElementById('ep').value,
       livox: document.getElementById('el').value, submit: document.getElementById('es').value,
       ddl:  document.getElementById('ed').value, submit_url: document.getElementById('eu').value,
-      livox_confirm: document.getElementById('elc').value
+      livox_confirm: document.getElementById('elc').value,
+      priority: document.getElementById('epr').value
     });
   }
   var hdrs = {'Content-Type':'application/json','X-Person':encodeURIComponent(S.name)};
@@ -774,7 +819,7 @@ function handleFile(file) {
 function showPreview(rows) {
   var tb = document.getElementById('preview-tbody');
   tb.innerHTML = rows.map(function(r,i){
-    return '<tr><td>'+(i+1)+'</td><td>'+r.item.substring(0,20)+'</td><td>'+(r.ddl||'—')+'</td><td>'+(r.person||'—')+'</td><td>'+(r.status||'未完成')+'</td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td>'+r.item.substring(0,20)+'</td><td>'+(r.ddl||'—')+'</td><td>'+(r.person||'—')+'</td><td>'+(r.priority||'中')+'</td><td>'+(r.status||'未完成')+'</td></tr>';
   }).join('');
   document.getElementById('preview-count').textContent = rows.length;
   document.getElementById('batch-preview').style.display = rows.length>0 ? '' : 'none';
@@ -855,6 +900,11 @@ document.getElementById('modal').onclick    = function(e){ if(e.target===this) c
 document.getElementById('pub-modal').onclick= function(e){ if(e.target===this) closePub(); };
 document.getElementById('batch-modal').onclick=function(e){ if(e.target===this) closeBatch(); };
 document.getElementById('log-modal').onclick= function(e){ if(e.target===this) closeLog(); };
+(function(){
+  var btn = document.getElementById('btn-toggle-old');
+  btn.textContent = S.showAllDone ? '⚙ 隐藏旧的已完成事项' : '⚙ 显示全部已完成';
+  btn.classList.toggle('on', S.showAllDone);
+})();
 
 load();
 setInterval(load, 30000);
