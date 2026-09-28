@@ -533,6 +533,7 @@ def api_export():
 
 @app.route('/api/template')
 def api_template():
+    if not is_admin(request): abort(403)
     if TEMPLATE_FILE.exists():
         return send_file(str(TEMPLATE_FILE), as_attachment=True,
                          download_name='事项明细模板.xlsx',
