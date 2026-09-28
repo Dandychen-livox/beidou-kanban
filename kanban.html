@@ -79,6 +79,12 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 .dtbl{margin:0 18px 28px;border-radius:5px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .dtbl-hdr{background:#1a3a8f;padding:9px 15px}
 .dtbl-hdr span{color:#fff;font-size:13px;font-weight:700}
+.dtbl-hdr2{background:#00838f;padding:9px 15px}
+.dtbl-hdr2 span{color:#fff;font-size:13px;font-weight:700}
+.dt.recur thead th{background:#00acc1}
+.dt.recur tr:nth-child(even) td{background:#e0f7fa}
+.dt.recur tr:hover td{background:#d4f2f5}
+.rc{display:inline-block;background:#e0f2f1;color:#00695c;border-radius:9px;padding:2px 8px;font-size:12px;white-space:nowrap}
 .dt thead th{background:#1e4a9a;color:#fff;padding:9px 11px;text-align:left;font-size:12px;border-right:1px solid rgba(255,255,255,.1);white-space:nowrap}
 .dt td{text-align:left;padding:9px 11px;border-right:1px solid #e5eaf5;border-bottom:1px solid #e5eaf5;font-size:12.5px;vertical-align:top}
 .dt tr:nth-child(even) td{background:#f6f8ff}
@@ -221,7 +227,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <thead>
         <tr>
           <th class="tl" rowspan="2">事项</th>
-          <th rowspan="2">待办总数</th><th rowspan="2">点状待办</th><th rowspan="2">重点事项</th>
+          <th rowspan="2">待办总数</th><th rowspan="2">重复性待办</th><th rowspan="2">待办事项</th>
           <th rowspan="2">已完成</th><th rowspan="2">挂起</th><th rowspan="2">关闭</th><th rowspan="2">进行中</th>
           <th colspan="3" class="th-exp">进行中待办的到期状态</th>
         </tr>
@@ -249,7 +255,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <thead>
         <tr>
           <th class="tl" rowspan="2">责任人</th>
-          <th rowspan="2">待办总数</th><th rowspan="2">点状待办</th><th rowspan="2">重点事项</th>
+          <th rowspan="2">待办总数</th><th rowspan="2">重复性待办</th><th rowspan="2">待办事项</th>
           <th rowspan="2">已完成</th><th rowspan="2">挂起</th><th rowspan="2">关闭</th><th rowspan="2">进行中</th>
           <th colspan="3" class="th-exp">进行中待办的到期状态</th>
         </tr>
@@ -275,9 +281,9 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <button class="bbatch" id="bbatch" onclick="openBatch()" style="display:none">⬆ 批量上传</button>
   </div>
 
-  <!-- 明细 -->
+  <!-- 待办明细 -->
   <div class="dtbl">
-    <div class="dtbl-hdr"><span>📄 事项明细</span> <span id="hide-hint" style="font-size:11px;color:#c5cfe8;font-weight:400;margin-left:10px"></span></div>
+    <div class="dtbl-hdr"><span>📄 待办事项明细</span> <span id="hide-hint" style="font-size:11px;color:#c5cfe8;font-weight:400;margin-left:10px"></span></div>
     <table class="dt">
       <thead>
         <tr>
@@ -297,7 +303,31 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <tbody id="dtbody"></tbody>
     </table>
   </div>
-  <div class="note">【说明】<strong>点状待办</strong>：无明确DDL或周期性事项 ｜ <strong>重点事项</strong>：有明确截止日期 ｜ <strong>临期</strong>：距DDL≤3天 ｜ <strong>逾期</strong>：已超过DDL未完成</div>
+
+  <!-- 重复性待办明细 -->
+  <div class="dtbl">
+    <div class="dtbl-hdr2"><span>🔁 重复性待办明细</span> <span id="hide-hint2" style="font-size:11px;color:#c9f4f8;font-weight:400;margin-left:10px"></span></div>
+    <table class="dt recur">
+      <thead>
+        <tr>
+          <th style="width:38px;text-align:center">序号</th>
+          <th style="min-width:140px">事项</th>
+          <th style="width:64px;text-align:center">优先级</th>
+          <th style="width:110px">周期说明</th>
+          <th style="min-width:180px">提交内容／要求</th>
+          <th style="width:105px;text-align:center">DDL（下次到期）</th>
+          <th style="width:95px;text-align:center">责任人</th>
+          <th style="min-width:160px">进展</th>
+          <th style="width:110px">提交物</th>
+          <th style="width:86px;text-align:center">闭环状态</th>
+          <th style="width:90px;text-align:center">Livox确认</th>
+          <th style="width:130px;text-align:center">操作</th>
+        </tr>
+      </thead>
+      <tbody id="rdtbody"></tbody>
+    </table>
+  </div>
+  <div class="note">【说明】<strong>待办事项</strong>：一次性事项，设置明确DDL ｜ <strong>重复性待办</strong>：按周期重复的事项，同样设置DDL（表示下一次到期时间） ｜ <strong>临期</strong>：距DDL≤3天 ｜ <strong>逾期</strong>：已超过DDL未完成</div>
 </div>
 
 <!-- 编辑Modal -->
@@ -313,10 +343,21 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       </div>
       <div class="fg"><label>提交内容／要求</label><textarea id="es" rows="3"></textarea></div>
       <div class="frow">
-        <div class="fg"><label>DDL</label><input id="ed" placeholder="如：2026-08-15 或 每月更新"></div>
+        <div class="fg"><label>DDL（一次性事项截止日，重复性待办为下次到期日）</label><input id="ed" placeholder="如：2026-08-15"></div>
         <div class="fg">
           <label>优先级</label>
           <select id="epr"><option value="高">🔴 高</option><option value="中">🟡 中</option><option value="低">🟢 低</option></select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg" style="flex:0 0 140px;display:flex;align-items:flex-end;padding-bottom:9px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#333;font-weight:400;margin:0">
+            <input type="checkbox" id="erecur" style="width:auto" onchange="toggleRecurField()"> 重复性待办
+          </label>
+        </div>
+        <div class="fg" id="recur-field" style="display:none">
+          <label>周期说明</label>
+          <input id="ernote" placeholder="如：每月31日 / 每周一">
         </div>
       </div>
       <div class="fg"><label>提交物链接</label><input id="eu" placeholder="https://..."></div>
@@ -569,7 +610,7 @@ function calcSt(rows) {
   rows.forEach(function(row) {
     r.total++;
     var t = ddlT(row.ddl, row.status);
-    if (t==='c') r.pt++; else r.key++;
+    if (row.recurring) r.pt++; else r.key++;
     if (isDone(row)) r.done++;
     else if (isHold(row)) r.hold++;
     else { r.inp++; if(t==='v') r.ov++; else if(t==='s') r.sn++; else r.nm++; }
@@ -595,7 +636,7 @@ function renderPerson() {
     ps(row.person).forEach(function(name) {
       if (!map[name]) map[name] = {total:0,pt:0,key:0,done:0,hold:0,inp:0,nm:0,sn:0,ov:0};
       var m = map[name]; m.total++;
-      if (t==='c') m.pt++; else m.key++;
+      if (row.recurring) m.pt++; else m.key++;
       if (isDone(row)) m.done++;
       else if (isHold(row)) m.hold++;
       else { m.inp++; if(t==='v') m.ov++; else if(t==='s') m.sn++; else m.nm++; }
@@ -628,16 +669,17 @@ function linkify(s) {
   return (s||'').replace(/https?:\/\/[^\s\n]+/g, function(u){ return '<a href="'+u+'" target="_blank">🔗链接</a>'; });
 }
 function renderDetail() {
-  var tb = document.getElementById('dtbody');
-  tb.innerHTML = '';
-  var hiddenOld = 0;
+  var tb  = document.getElementById('dtbody');
+  var rtb = document.getElementById('rdtbody');
+  tb.innerHTML = ''; rtb.innerHTML = '';
+  var hiddenOld = 0, hiddenOld2 = 0;
   DATA.forEach(function(row) {
     var done = isDone(row);
     var mine = isMine(row);
-    var canEdit = S.role==='admin' || mine;
+    var isRecur = !!row.recurring;
     var show = FIL==='all' || (FIL==='done'&&done) || (FIL==='undone'&&!done) || (FIL==='mine'&&mine);
     var oldDone = isOldDone(row);
-    if (show && oldDone && !S.showAllDone) { show = false; hiddenOld++; }
+    if (show && oldDone && !S.showAllDone) { show = false; if (isRecur) hiddenOld2++; else hiddenOld++; }
     var ph = ps(row.person).map(function(p){
       return '<span class="pc'+(S.role==='person'&&p===S.name?' me':'')+'">'+p+'</span>';
     }).join(' ');
@@ -655,27 +697,47 @@ function renderDetail() {
            '<button class="bd" onclick="delRow('+row.id+')">🗑</button>'+
            '<br><button class="bpub" style="margin-top:3px" onclick="openPublic('+row.id+')">✏ 填写</button>';
     }
+    var progressCell = '<div class="ptxt">'+(row.progress||'<span style="color:#bbb">暂无进展</span>')+'</div>'+
+      (row.updated_at?'<div class="umeta">'+row.updated_at+(row.updated_by?' by '+row.updated_by:'')+'</div>':'');
     var tr = document.createElement('tr');
     if (!show) tr.className = 'hidden';
     tr.dataset.status = done ? 'done' : 'undone';
     tr.dataset.mine   = mine ? '1' : '0';
-    tr.innerHTML =
-      '<td style="text-align:center;font-weight:700;color:#1565c0">'+row.id+'</td>'+
-      '<td><div class="iname">'+row.item+'</div></td>'+
-      '<td style="text-align:center">'+priTag(row)+'</td>'+
-      '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
-      '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
-      '<td style="text-align:center">'+ph+'</td>'+
-      '<td><div class="ptxt">'+(row.progress||'<span style="color:#bbb">暂无进展</span>')+'</div>'+
-      (row.updated_at?'<div class="umeta">'+row.updated_at+(row.updated_by?' by '+row.updated_by:'')+'</div>':'')+'</td>'+
-      '<td>'+subUrl+'</td>'+
-      '<td style="text-align:center">'+sh+'</td>'+
-      '<td style="text-align:center">'+lcH+'</td>'+
-      '<td style="text-align:center">'+eb+'</td>';
-    tb.appendChild(tr);
+    if (isRecur) {
+      tr.innerHTML =
+        '<td style="text-align:center;font-weight:700;color:#00838f">'+row.id+'</td>'+
+        '<td><div class="iname">'+row.item+'</div></td>'+
+        '<td style="text-align:center">'+priTag(row)+'</td>'+
+        '<td style="text-align:center"><span class="rc">🔁 '+(row.recur_note||'—')+'</span></td>'+
+        '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
+        '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
+        '<td style="text-align:center">'+ph+'</td>'+
+        '<td>'+progressCell+'</td>'+
+        '<td>'+subUrl+'</td>'+
+        '<td style="text-align:center">'+sh+'</td>'+
+        '<td style="text-align:center">'+lcH+'</td>'+
+        '<td style="text-align:center">'+eb+'</td>';
+      rtb.appendChild(tr);
+    } else {
+      tr.innerHTML =
+        '<td style="text-align:center;font-weight:700;color:#1565c0">'+row.id+'</td>'+
+        '<td><div class="iname">'+row.item+'</div></td>'+
+        '<td style="text-align:center">'+priTag(row)+'</td>'+
+        '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
+        '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
+        '<td style="text-align:center">'+ph+'</td>'+
+        '<td>'+progressCell+'</td>'+
+        '<td>'+subUrl+'</td>'+
+        '<td style="text-align:center">'+sh+'</td>'+
+        '<td style="text-align:center">'+lcH+'</td>'+
+        '<td style="text-align:center">'+eb+'</td>';
+      tb.appendChild(tr);
+    }
   });
   var hint = document.getElementById('hide-hint');
   hint.textContent = (hiddenOld>0 && !S.showAllDone) ? ('（已隐藏 '+hiddenOld+' 条完成超过一周的事项，点击右上角"⚙ 显示全部已完成"查看）') : '';
+  var hint2 = document.getElementById('hide-hint2');
+  hint2.textContent = (hiddenOld2>0 && !S.showAllDone) ? ('（已隐藏 '+hiddenOld2+' 条完成超过一周的事项）') : '';
 }
 function setF(f, btn) {
   FIL = f;
@@ -704,18 +766,26 @@ function openEdit(id) {
     document.getElementById('ed').value = row.ddl    || '';
     document.getElementById('eu').value = row.submit_url || '';
     document.getElementById('epr').value = priorityOf(row);
+    document.getElementById('erecur').checked = !!row.recurring;
+    document.getElementById('ernote').value = row.recur_note || '';
+    toggleRecurField();
   }
   document.getElementById('modal').className = 'mbg show';
+}
+function toggleRecurField() {
+  document.getElementById('recur-field').style.display = document.getElementById('erecur').checked ? '' : 'none';
 }
 function openAdd() {
   document.getElementById('eid').value = '';
   document.getElementById('mtitle').textContent = '＋ 新增事项';
   document.getElementById('aonly').style.display = '';
   document.getElementById('lc-field').style.display = '';
-  ['ei','ep','el','es','ed','eu','epg'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['ei','ep','el','es','ed','eu','epg','ernote'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('est').value = '未完成';
   document.getElementById('elc').value = '未完成';
   document.getElementById('epr').value = '中';
+  document.getElementById('erecur').checked = false;
+  toggleRecurField();
   document.getElementById('modal').className = 'mbg show';
 }
 function closeM() { document.getElementById('modal').className = 'mbg'; }
@@ -729,7 +799,9 @@ function saveM() {
       livox: document.getElementById('el').value, submit: document.getElementById('es').value,
       ddl:  document.getElementById('ed').value, submit_url: document.getElementById('eu').value,
       livox_confirm: document.getElementById('elc').value,
-      priority: document.getElementById('epr').value
+      priority: document.getElementById('epr').value,
+      recurring: document.getElementById('erecur').checked,
+      recur_note: document.getElementById('ernote').value
     });
   }
   var hdrs = {'Content-Type':'application/json','X-Person':encodeURIComponent(S.name)};

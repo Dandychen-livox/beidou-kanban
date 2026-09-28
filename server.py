@@ -150,9 +150,15 @@ def is_admin(req):
 
 # ── 优先级 / 完成时间 ──
 PRIORITIES = ('高', '中', '低')
+PERIOD_RE  = re.compile(r'每|周|月')
+DATE_RE    = re.compile(r'^\d{4}-\d{1,2}-\d{1,2}$')
 
 def norm_priority(v):
     return v if v in PRIORITIES else '中'
+
+def norm_bool(v):
+    if isinstance(v, bool): return v
+    return str(v).strip() in ('1', 'true', 'True', '是', 'TRUE', 'yes', 'Yes', 'on')
 
 def apply_completion_state(row):
     """维护 completed_at：状态与Livox确认双重变为“完成”时记录完成时间，
@@ -175,8 +181,10 @@ def apply_status_completion(row):
         row['status_done_at'] = ''
 
 def _migrate_data():
-    """兼容旧数据：补齐 priority / completed_at / status_done_at 字段
-       （旧的已完成事项用 updated_at 作为完成时间近似值）"""
+    """兼容旧数据：补齐 priority / completed_at / status_done_at / recurring / recur_note 字段
+       （旧的已完成事项用 updated_at 作为完成时间近似值；旧的“点状待办”规则——DDL 含“每/周/月”
+       字样或为空——统一识别为“重复性待办”，原描述文字迁移到 recur_note，DDL 清空待人工填写
+       真实的下次到期日期，不再用文字描述冒充截止时间）"""
     rows = read_data()
     changed = False
     for row in rows:
@@ -198,9 +206,19 @@ def _migrate_data():
         elif row.get('status_done_at'):
             row['status_done_at'] = ''
             changed = True
+        if 'recurring' not in row:
+            ddl = (row.get('ddl') or '').strip()
+            if ddl and PERIOD_RE.search(ddl) and not DATE_RE.match(ddl):
+                row['recurring']  = True
+                row['recur_note'] = ddl
+                row['ddl'] = ''
+            else:
+                row['recurring']  = False
+                row.setdefault('recur_note', '')
+            changed = True
     if changed:
         write_data(rows)
-        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at 字段', flush=True)
+        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at/recurring 字段', flush=True)
 
 _migrate_data()
 
@@ -277,6 +295,7 @@ def api_update(row_id):
             if caller not in ps: abort(403)
             body = {k: v for k, v in body.items() if k in ('progress', 'status', 'livox_confirm', 'priority')}
         if 'priority' in body: body['priority'] = norm_priority(body['priority'])
+        if 'recurring' in body: body['recurring'] = norm_bool(body['recurring'])
         row.update(body)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         row['updated_by'] = caller or ('管理员' if admin else '?')
@@ -309,6 +328,8 @@ def api_add():
             'person':       body.get('person', ''),
             'livox':        body.get('livox', 'Dandy'),
             'priority':     norm_priority(body.get('priority', '中')),
+            'recurring':    norm_bool(body.get('recurring', False)),
+            'recur_note':   body.get('recur_note', ''),
             'progress':     '',
             'submit_url':   body.get('submit_url', ''),
             'status':       '未完成',
@@ -347,8 +368,8 @@ def api_template():
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = '事项明细'
-        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人', '优先级', '进展', '提交物链接', '闭环状态']
-        notes   = ['必填', '提交要求', '如：2026-08-15或每月更新', '如：赵云飞', '如：Dandy', '高/中/低，留空默认中', '进展说明', 'https://...', '未完成/完成/挂起']
+        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人', '优先级', '重复性待办', '周期说明', '进展', '提交物链接', '闭环状态']
+        notes   = ['必填', '提交要求', '如：2026-08-15（一次性事项截止日/重复性待办下次到期日）', '如：赵云飞', '如：Dandy', '高/中/低，留空默认中', '是/否，留空默认否', '如：每月31日，仅重复性待办填写', '进展说明', 'https://...', '未完成/完成/挂起']
         for i, (h, n) in enumerate(zip(headers, notes), 1):
             ws.cell(1, i, h)
             ws.cell(2, i, n)
@@ -403,6 +424,8 @@ def _parse_excel(stream):
         '责任人': 'person',
         'LIVOX对接人': 'livox', 'Livox对接人': 'livox',
         '优先级': 'priority',
+        '重复性待办': 'recurring', '是否重复': 'recurring',
+        '周期说明': 'recur_note', '周期': 'recur_note',
         '进展': 'progress',
         '提交物链接': 'submit_url', '提交物': 'submit_url',
         '闭环状态': 'status', '状态': 'status',
@@ -434,6 +457,7 @@ def _do_batch(items):
                 'item': item.get('item', ''), 'submit': item.get('submit', ''),
                 'ddl':  item.get('ddl', ''),  'person': item.get('person', ''),
                 'livox': item.get('livox', 'Dandy'), 'priority': norm_priority(item.get('priority', '中')),
+                'recurring': norm_bool(item.get('recurring', False)), 'recur_note': item.get('recur_note', ''),
                 'progress': item.get('progress', ''),
                 'submit_url': item.get('submit_url', ''), 'status': status,
                 'livox_confirm': '未完成',
