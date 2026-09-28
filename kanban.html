@@ -641,7 +641,7 @@ function renderDetail() {
     var ph = ps(row.person).map(function(p){
       return '<span class="pc'+(S.role==='person'&&p===S.name?' me':'')+'">'+p+'</span>';
     }).join(' ');
-    var sh = row.status==='完成' ? '<span class="sdone">✓ 完成</span>' :
+    var sh = row.status==='完成' ? '<span class="sdone">✓ 完成</span>'+(row.status_done_at?'<div class="umeta">'+row.status_done_at+'</div>':'') :
              row.status==='挂起' ? '<span class="shold">⏸ 挂起</span>' :
              '<span class="sund">● 未完成</span>';
     var lc = row.livox_confirm || '未完成';

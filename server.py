@@ -164,8 +164,19 @@ def apply_completion_state(row):
     else:
         row['completed_at'] = ''
 
+def apply_status_completion(row):
+    """记录责任人/参与人把闭环状态填写为“完成”的时间（status_done_at），
+       不依赖Livox是否二次确认；后续再编辑进展等其它字段也不会覆盖这个时间，
+       只有状态离开“完成”再重新变回“完成”时才会更新为新的时间"""
+    if row.get('status') == '完成':
+        if not row.get('status_done_at'):
+            row['status_done_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    else:
+        row['status_done_at'] = ''
+
 def _migrate_data():
-    """兼容旧数据：补齐 priority / completed_at 字段（旧的已完成事项用 updated_at 作为完成时间近似值）"""
+    """兼容旧数据：补齐 priority / completed_at / status_done_at 字段
+       （旧的已完成事项用 updated_at 作为完成时间近似值）"""
     rows = read_data()
     changed = False
     for row in rows:
@@ -180,9 +191,16 @@ def _migrate_data():
         elif row.get('completed_at'):
             row['completed_at'] = ''
             changed = True
+        if row.get('status') == '完成':
+            if not row.get('status_done_at'):
+                row['status_done_at'] = row.get('updated_at') or datetime.now().strftime('%Y-%m-%d %H:%M')
+                changed = True
+        elif row.get('status_done_at'):
+            row['status_done_at'] = ''
+            changed = True
     if changed:
         write_data(rows)
-        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at 字段', flush=True)
+        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at 字段', flush=True)
 
 _migrate_data()
 
@@ -231,6 +249,7 @@ def api_public_update(row_id):
         row.update(allowed)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         row['updated_by'] = caller
+        apply_status_completion(row)
         apply_completion_state(row)
         rows[idx] = row
         write_data(rows)
@@ -261,6 +280,7 @@ def api_update(row_id):
         row.update(body)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
         row['updated_by'] = caller or ('管理员' if admin else '?')
+        apply_status_completion(row)
         apply_completion_state(row)
         rows[idx] = row
         write_data(rows)
@@ -294,6 +314,7 @@ def api_add():
             'status':       '未完成',
             'livox_confirm':'未完成',
             'completed_at': '',
+            'status_done_at': '',
             'updated_at':   datetime.now().strftime('%Y-%m-%d %H:%M'),
             'updated_by':   '管理员'
         }
@@ -417,6 +438,7 @@ def _do_batch(items):
                 'submit_url': item.get('submit_url', ''), 'status': status,
                 'livox_confirm': '未完成',
                 'completed_at': '',
+                'status_done_at': status=='完成' and datetime.now().strftime('%Y-%m-%d %H:%M') or '',
                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
                 'updated_by': '管理员(批量导入)',
             }
