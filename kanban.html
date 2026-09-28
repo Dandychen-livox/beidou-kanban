@@ -75,6 +75,8 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 .btpl:hover{background:#0d47a1}
 .bbatch{padding:6px 14px;background:#6a1b9a;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;margin-left:4px}
 .bbatch:hover{background:#4a148c}
+.bexport{padding:6px 14px;background:#2e7d32;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;margin-left:4px}
+.bexport:hover{background:#1b5e20}
 /* 明细表 */
 .dtbl{margin:0 18px 28px;border-radius:5px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .dtbl-hdr{background:#1a3a8f;padding:9px 15px}
@@ -269,6 +271,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <button class="badd" id="badd" onclick="openAdd()" style="display:none">＋ 新增事项</button>
     <button class="btpl" id="btpl" onclick="downloadTemplate()" style="display:none">⬇ 下载模板</button>
     <button class="bbatch" id="bbatch" onclick="openBatch()" style="display:none">⬆ 批量上传</button>
+    <button class="bexport" id="bexport" onclick="downloadExport()" style="display:none">⬇ 备份下载(Excel)</button>
   </div>
 
   <!-- 待办明细 -->
@@ -445,6 +448,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <option value="批量导入">批量导入</option>
         <option value="新增权限">新增权限</option>
         <option value="删除权限">删除权限</option>
+        <option value="导出备份">导出备份</option>
         <option value="登录">登录</option>
       </select>
       <span id="log-count" style="font-size:12px;color:#888;margin-left:4px"></span>
@@ -536,6 +540,7 @@ function enter() {
     document.getElementById('badd').style.display = '';
     document.getElementById('btpl').style.display = '';
     document.getElementById('bbatch').style.display = '';
+    document.getElementById('bexport').style.display = '';
     document.getElementById('btn-log').style.display = '';
     document.getElementById('btn-perm').style.display = '';
     document.getElementById('bmine').style.display = 'none';
@@ -545,6 +550,7 @@ function enter() {
     document.getElementById('badd').style.display = 'none';
     document.getElementById('btpl').style.display = 'none';
     document.getElementById('bbatch').style.display = 'none';
+    document.getElementById('bexport').style.display = 'none';
     document.getElementById('btn-log').style.display = 'none';
     document.getElementById('btn-perm').style.display = 'none';
   }
@@ -560,6 +566,7 @@ function doLogout() {
   document.getElementById('badd').style.display = 'none';
   document.getElementById('btpl').style.display = 'none';
   document.getElementById('bbatch').style.display = 'none';
+  document.getElementById('bexport').style.display = 'none';
   document.getElementById('btn-log').style.display = 'none';
   document.getElementById('btn-perm').style.display = 'none';
   document.getElementById('bmine').style.display = 'none';
@@ -887,6 +894,20 @@ function downloadTemplate() {
     URL.revokeObjectURL(url);
   }).catch(function(){ showT('模板下载失败','err'); });
 }
+function downloadExport() {
+  showT('正在生成备份文件...','ok');
+  fetch('/api/export', {headers:{'X-Session':S.token}})
+  .then(function(r){ if(!r.ok) throw new Error('导出失败'); return r.blob(); })
+  .then(function(blob){
+    var now = new Date();
+    var ts = now.getFullYear()+p2(now.getMonth()+1)+p2(now.getDate())+'_'+p2(now.getHours())+p2(now.getMinutes());
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download='北斗看板备份_'+ts+'.xlsx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showT('备份下载完成','ok');
+  }).catch(function(){ showT('备份下载失败','err'); });
+}
 function openBatch() {
   _batchData = [];
   document.getElementById('batch-preview').style.display = 'none';
@@ -968,7 +989,7 @@ function renderLog() {
   var em = document.getElementById('log-empty');
   if (!rows.length) { tb.innerHTML=''; em.style.display=''; return; }
   em.style.display = 'none';
-  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','登录':'la-login'};
+  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','登录':'la-login'};
   tb.innerHTML = rows.map(function(r){
     return '<tr><td style="white-space:nowrap">'+r.time+'</td><td><strong>'+r.operator+'</strong></td>'+
       '<td><span class="'+(acls[r.action]||'la-edit')+'">'+r.action+'</span></td>'+

@@ -491,6 +491,46 @@ def api_delete(row_id):
     add_log(caller, '删除事项', row_id, item_name)
     return jsonify({'ok': True})
 
+@app.route('/api/export')
+def api_export():
+    """一键备份：把当前全部事项导出为 Excel，供管理员下载存档"""
+    if not is_admin(request): abort(403)
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill
+    rows = read_data()
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = '事项备份'
+    headers = ['ID', '事项名称', '类型', '周期说明', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
+               '优先级', '进展', '提交物链接', '闭环状态', 'Livox确认', '完成时间(责任人标记)',
+               '完成时间(双重确认)', '最近更新时间', '最近更新人', '创建日期']
+    ws.append(headers)
+    for c in ws[1]:
+        c.font = Font(bold=True, color='FFFFFF')
+        c.fill = PatternFill('solid', fgColor='1A3A8F')
+    for r in rows:
+        ws.append([
+            r.get('id', ''), r.get('item', ''),
+            '重复性待办' if r.get('recurring') else '待办事项',
+            r.get('recur_note', ''), r.get('submit', ''), r.get('ddl', ''),
+            r.get('person', ''), r.get('livox', ''), r.get('priority', '中'),
+            r.get('progress', ''), r.get('submit_url', ''), r.get('status', ''),
+            r.get('livox_confirm', ''), r.get('status_done_at', ''),
+            r.get('completed_at', ''), r.get('updated_at', ''), r.get('updated_by', ''),
+            r.get('date', ''),
+        ])
+    widths = [6, 26, 12, 12, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
+    for i, w in enumerate(widths, 1):
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    ts = datetime.now().strftime('%Y%m%d_%H%M')
+    add_log(get_caller(request), '导出备份', None, None, f'共导出{len(rows)}条事项')
+    return Response(buf.read(),
+                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    headers={'Content-Disposition': f'attachment;filename=beidou-kanban-backup-{ts}.xlsx'})
+
 @app.route('/api/template')
 def api_template():
     if TEMPLATE_FILE.exists():
