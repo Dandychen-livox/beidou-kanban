@@ -3,18 +3,28 @@
 from flask import Flask, jsonify, request, Response, abort, send_file
 from pathlib import Path
 from datetime import datetime
-import json, re, threading, os, io, base64
-from urllib.parse import unquote
+import json, re, threading, os, io, base64, hmac, hashlib, time
 
 BASE           = Path(__file__).parent
 DATA           = BASE / 'data.json'
 LOG_FILE       = BASE / 'oplog.json'
+CONTACTS_FILE  = BASE / 'contacts.json'
 BACKUP         = BASE / 'backup'
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'livox2026')
 TEMPLATE_FILE  = BASE / 'template.xlsx'
 # GitHub 自动同步配置（在 Render 环境变量中设置）
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 GITHUB_REPO  = os.environ.get('GITHUB_REPO', 'Dandychen-livox/beidou-kanban')
+# 会话签名密钥（用于邮箱登录后签发免密会话token，建议在 Render 环境变量单独配置 SESSION_SECRET）
+SESSION_SECRET = os.environ.get('SESSION_SECRET') or ADMIN_PASSWORD or 'beidou-kanban-session-secret'
+SESSION_TTL    = 30 * 86400  # 会话有效期30天
+# 兜底管理员邮箱（即使 contacts.json 被误改，这些邮箱依然保留管理员权限，避免管理员被意外锁定）
+FALLBACK_ADMIN_EMAILS = set(
+    e.strip().lower() for e in os.environ.get(
+        'ADMIN_EMAILS',
+        'xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,jessica.li@livoxtech.com'
+    ).split(',') if e.strip()
+)
 _lock        = threading.Lock()
 _sync_lock   = threading.Lock()   # 防止并发 push
 
@@ -106,6 +116,72 @@ def _sync_file_from_github(local_path, github_path):
 # 服务启动时立即从 GitHub 拉取最新数据（在任何请求处理之前执行）
 _sync_file_from_github(DATA, 'data.json')
 _sync_file_from_github(LOG_FILE, 'oplog.json')
+_sync_file_from_github(CONTACTS_FILE, 'contacts.json')
+
+# ── 通讯录 / 登录权限（管理员可在“权限管理”里增删邮箱） ──
+def read_contacts():
+    if not CONTACTS_FILE.exists(): return []
+    try:
+        return json.loads(CONTACTS_FILE.read_text(encoding='utf-8'))
+    except Exception:
+        return []
+
+def write_contacts(contacts):
+    CONTACTS_FILE.write_text(json.dumps(contacts, ensure_ascii=False, indent=2), encoding='utf-8')
+    threading.Thread(target=lambda: _sync_file_to_github(CONTACTS_FILE, 'contacts.json'), daemon=True).start()
+
+def contact_by_email(email):
+    email = (email or '').strip().lower()
+    for c in read_contacts():
+        if (c.get('email') or '').strip().lower() == email:
+            return c
+    return None
+
+def is_admin_email(email):
+    email = (email or '').strip().lower()
+    if email in FALLBACK_ADMIN_EMAILS:
+        return True
+    c = contact_by_email(email)
+    return bool(c and c.get('role') == 'admin')
+
+# ── 会话签名（邮箱登录成功后签发，30天内免密） ──
+def make_session(email):
+    email = email.strip().lower()
+    exp = int(time.time()) + SESSION_TTL
+    payload = f'{email}|{exp}'
+    sig = hmac.new(SESSION_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
+    raw = f'{payload}|{sig}'
+    return base64.urlsafe_b64encode(raw.encode()).decode()
+
+def verify_session(token):
+    if not token:
+        return None
+    try:
+        raw = base64.urlsafe_b64decode(token.encode()).decode()
+        email, exp, sig = raw.rsplit('|', 2)
+        expect = hmac.new(SESSION_SECRET.encode(), f'{email}|{exp}'.encode(), hashlib.sha256).hexdigest()[:32]
+        if not hmac.compare_digest(sig, expect):
+            return None
+        if int(exp) < time.time():
+            return None
+    except Exception:
+        return None
+    c = contact_by_email(email)
+    if is_admin_email(email):
+        role = 'admin'
+        name = (c or {}).get('name') or email.split('@')[0]
+    elif c:
+        role = 'person'
+        name = c.get('name') or email.split('@')[0]
+    else:
+        return None  # 邮箱已被从名单中移除，会话失效
+    return {'email': email, 'role': role, 'name': name}
+
+def require_session(req):
+    sess = verify_session(req.headers.get('X-Session', ''))
+    if not sess:
+        abort(401)
+    return sess
 
 # ── 操作日志 ──
 def read_log():
@@ -135,18 +211,14 @@ def add_log(operator, action, item_id=None, item_name=None, detail=None):
     except Exception:
         pass
 
-def get_caller(req, body=None):
-    """安全获取调用者姓名，处理URL编码的中文"""
-    raw = req.headers.get('X-Person', '')
-    if not raw and body:
-        raw = body.get('caller', '')
-    try:
-        return unquote(raw).strip() or '匿名'
-    except Exception:
-        return raw.strip() or '匿名'
+def get_caller(req):
+    """从会话中获取当前登录人姓名（登录邮箱对应的通讯录姓名）"""
+    sess = verify_session(req.headers.get('X-Session', ''))
+    return sess['name'] if sess else '匿名'
 
 def is_admin(req):
-    return req.headers.get('X-Admin-Token') == ADMIN_PASSWORD
+    sess = verify_session(req.headers.get('X-Session', ''))
+    return bool(sess and sess['role'] == 'admin')
 
 # ── 优先级 / 完成时间 ──
 PRIORITIES = ('高', '中', '低')
@@ -235,15 +307,36 @@ def health():
 
 @app.route('/api/data')
 def api_data():
+    require_session(request)
     return jsonify(read_data())
 
 @app.route('/api/auth', methods=['POST'])
 def api_auth():
-    body = request.get_json(force=True) or {}
-    if body.get('password') == ADMIN_PASSWORD:
-        add_log('管理员', '登录')
-        return jsonify({'ok': True, 'token': ADMIN_PASSWORD})
-    return jsonify({'ok': False, 'msg': '密码错误'}), 401
+    """邮箱登录：
+       - 普通联系人邮箱：直接登录，身份为“责任人”
+       - 管理员邮箱：先返回 need_password，前端再带上密码二次提交完成双重验证
+       - 不在名单里的邮箱：拒绝登录"""
+    body     = request.get_json(force=True) or {}
+    email    = (body.get('email') or '').strip().lower()
+    password = body.get('password')
+    if not email:
+        return jsonify({'ok': False, 'msg': '请输入邮箱'}), 400
+    contact = contact_by_email(email)
+    admin_candidate = is_admin_email(email)
+    if not contact and not admin_candidate:
+        return jsonify({'ok': False, 'msg': '该邮箱未在授权名单中，请联系管理员开通权限'}), 403
+    name = (contact or {}).get('name') or email.split('@')[0]
+    if admin_candidate:
+        if password is None:
+            return jsonify({'ok': True, 'need_password': True})
+        if password != ADMIN_PASSWORD:
+            return jsonify({'ok': False, 'msg': '管理员密码错误'}), 401
+        token = make_session(email)
+        add_log(name, '登录', detail=email + '（管理员）')
+        return jsonify({'ok': True, 'role': 'admin', 'name': name, 'token': token})
+    token = make_session(email)
+    add_log(name, '登录', detail=email)
+    return jsonify({'ok': True, 'role': 'person', 'name': name, 'token': token})
 
 @app.route('/api/log')
 def api_log():
@@ -252,10 +345,48 @@ def api_log():
     logs.reverse()
     return jsonify(logs)
 
+@app.route('/api/contacts')
+def api_contacts():
+    if not is_admin(request): abort(403)
+    return jsonify(read_contacts())
+
+@app.route('/api/contacts', methods=['POST'])
+def api_contacts_add():
+    if not is_admin(request): abort(403)
+    body  = request.get_json(force=True) or {}
+    email = (body.get('email') or '').strip().lower()
+    name  = (body.get('name') or '').strip()
+    role  = body.get('role') if body.get('role') in ('admin', 'person') else 'person'
+    if not email or not name:
+        return jsonify({'ok': False, 'msg': '姓名和邮箱不能为空'}), 400
+    with _lock:
+        contacts = read_contacts()
+        if any((c.get('email') or '').strip().lower() == email for c in contacts):
+            return jsonify({'ok': False, 'msg': '该邮箱已存在'}), 400
+        contacts.append({'name': name, 'email': email, 'role': role})
+        write_contacts(contacts)
+    add_log(get_caller(request), '新增权限', None, name, f'邮箱:{email}；角色:{"管理员" if role=="admin" else "责任人"}')
+    return jsonify({'ok': True})
+
+@app.route('/api/contacts/<path:email>', methods=['DELETE'])
+def api_contacts_del(email):
+    if not is_admin(request): abort(403)
+    email = email.strip().lower()
+    if email in FALLBACK_ADMIN_EMAILS:
+        return jsonify({'ok': False, 'msg': '该邮箱为系统兜底管理员，不能移除'}), 400
+    with _lock:
+        contacts = read_contacts()
+        remain = [c for c in contacts if (c.get('email') or '').strip().lower() != email]
+        if len(remain) == len(contacts): abort(404)
+        write_contacts(remain)
+    add_log(get_caller(request), '删除权限', None, None, f'邮箱:{email}')
+    return jsonify({'ok': True})
+
 @app.route('/api/public_update/<int:row_id>', methods=['POST'])
 def api_public_update(row_id):
+    sess   = require_session(request)
+    caller = sess['name']
     body   = request.get_json(force=True) or {}
-    caller = get_caller(request, body)
     allowed = {k: v for k, v in body.items() if k in ('person', 'progress', 'submit_url', 'status', 'priority')}
     if not allowed: abort(400)
     if 'priority' in allowed: allowed['priority'] = norm_priority(allowed['priority'])
@@ -282,9 +413,10 @@ def api_public_update(row_id):
 
 @app.route('/api/update/<int:row_id>', methods=['POST'])
 def api_update(row_id):
+    sess   = require_session(request)
+    admin  = sess['role'] == 'admin'
+    caller = sess['name']
     body   = request.get_json(force=True) or {}
-    admin  = is_admin(request)
-    caller = get_caller(request)
     with _lock:
         rows = read_data()
         idx  = next((i for i, r in enumerate(rows) if str(r.get('id')) == str(row_id)), None)
@@ -298,7 +430,7 @@ def api_update(row_id):
         if 'recurring' in body: body['recurring'] = norm_bool(body['recurring'])
         row.update(body)
         row['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M')
-        row['updated_by'] = caller or ('管理员' if admin else '?')
+        row['updated_by'] = caller
         apply_status_completion(row)
         apply_completion_state(row)
         rows[idx] = row
@@ -309,12 +441,13 @@ def api_update(row_id):
     if 'livox_confirm' in body: parts.append('Livox确认→' + body['livox_confirm'])
     if 'person'        in body: parts.append('责任人→' + body['person'])
     if 'priority'      in body: parts.append('优先级→' + body['priority'])
-    add_log('管理员' if admin else caller, '编辑事项', row_id, row.get('item', '')[:20], '；'.join(parts))
+    add_log(caller, '编辑事项', row_id, row.get('item', '')[:20], '；'.join(parts))
     return jsonify({'ok': True, 'row': row})
 
 @app.route('/api/add', methods=['POST'])
 def api_add():
     if not is_admin(request): abort(403)
+    caller = get_caller(request)
     body = request.get_json(force=True) or {}
     with _lock:
         rows   = read_data()
@@ -337,16 +470,17 @@ def api_add():
             'completed_at': '',
             'status_done_at': '',
             'updated_at':   datetime.now().strftime('%Y-%m-%d %H:%M'),
-            'updated_by':   '管理员'
+            'updated_by':   caller
         }
         rows.append(row)
         write_data(rows)
-    add_log('管理员', '新增事项', new_id, row['item'][:20])
+    add_log(caller, '新增事项', new_id, row['item'][:20])
     return jsonify({'ok': True, 'row': row})
 
 @app.route('/api/delete/<int:row_id>', methods=['DELETE'])
 def api_delete(row_id):
     if not is_admin(request): abort(403)
+    caller = get_caller(request)
     with _lock:
         rows = read_data()
         idx  = next((i for i, r in enumerate(rows) if str(r.get('id')) == str(row_id)), None)
@@ -354,7 +488,7 @@ def api_delete(row_id):
         item_name = rows[idx].get('item', '')[:20]
         rows.pop(idx)
         write_data(rows)
-    add_log('管理员', '删除事项', row_id, item_name)
+    add_log(caller, '删除事项', row_id, item_name)
     return jsonify({'ok': True})
 
 @app.route('/api/template')
@@ -444,6 +578,7 @@ def _parse_excel(stream):
 
 def _do_batch(items):
     if not items: return jsonify({'ok': False, 'msg': '没有可导入的数据'})
+    caller = get_caller(request)
     added = []
     with _lock:
         rows   = read_data()
@@ -464,12 +599,12 @@ def _do_batch(items):
                 'completed_at': '',
                 'status_done_at': status=='完成' and datetime.now().strftime('%Y-%m-%d %H:%M') or '',
                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                'updated_by': '管理员(批量导入)',
+                'updated_by': caller + '(批量导入)',
             }
             rows.append(row)
             added.append(row)
         write_data(rows)
-    add_log('管理员', '批量导入', None, None, '导入' + str(len(added)) + '条事项')
+    add_log(caller, '批量导入', None, None, '导入' + str(len(added)) + '条事项')
     return jsonify({'ok': True, 'added': len(added), 'rows': added})
 
 if __name__ == '__main__':

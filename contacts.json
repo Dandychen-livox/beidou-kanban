@@ -1,0 +1,82 @@
+[
+  {
+    "name": "徐培贺",
+    "email": "peihe.xu@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "周培云",
+    "email": "peiyunzhou@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "陈铭亮",
+    "email": "mingliang.chen@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "肖玉虎",
+    "email": "yuhuxiao@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "杨朔",
+    "email": "yangshuo@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "李建萍",
+    "email": "lijp@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "陈学梅",
+    "email": "chenxuemei@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "陈霞",
+    "email": "xia.chen@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "杨海月",
+    "email": "yanghaiyue@bdstar.com",
+    "role": "person"
+  },
+  {
+    "name": "赵云飞",
+    "email": "yunfei.zhao@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "张志坚",
+    "email": "zhijian.zhang@ronwelltech.com",
+    "role": "person"
+  },
+  {
+    "name": "Dandy.chen",
+    "email": "xiaodanchen@livoxtech.com",
+    "role": "admin"
+  },
+  {
+    "name": "Nathan.song",
+    "email": "songzhiyu@livoxtech.com",
+    "role": "admin"
+  },
+  {
+    "name": "Jessica.li",
+    "email": "Jessica.li@livoxtech.com",
+    "role": "admin"
+  },
+  {
+    "name": "Karson.chen",
+    "email": "karson.chen@livoxtech.com",
+    "role": "person"
+  },
+  {
+    "name": "wei.ma",
+    "email": "wei.ma@livoxtech.com",
+    "role": "person"
+  }
+]

@@ -182,22 +182,11 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 <div id="login">
   <div class="lbox">
     <h2>北斗代理事项闭环看板</h2>
-    <p>登录后可编辑事项 · 游客可直接关闭查看</p>
-    <button class="skip-btn" onclick="skipLogin()">跳过，直接查看 ✕</button>
-    <div class="tabs">
-      <button class="tab on" id="t1" onclick="swTab('person')">责任人登录</button>
-      <button class="tab" id="t2" onclick="swTab('admin')">管理员登录</button>
-    </div>
-    <div id="tp">
-      <input id="iname" class="linput" placeholder="输入您的姓名，如：赵云飞">
-      <div class="lhint">登录后可编辑您负责的事项进展与状态</div>
-      <button class="lbtn" onclick="loginPerson()">进入看板</button>
-    </div>
-    <div id="ta" style="display:none">
-      <input id="ipw" class="linput" type="password" placeholder="管理员密码">
-      <div class="lhint">可新增、编辑、删除所有事项</div>
-      <button class="lbtn" onclick="loginAdmin()">进入看板</button>
-    </div>
+    <p>为保密管理，仅授权邮箱可登录查看</p>
+    <input id="ilemail" class="linput" type="email" placeholder="请输入您的授权邮箱" autocomplete="email">
+    <input id="ilpw" class="linput" type="password" placeholder="管理员密码" style="display:none">
+    <div class="lhint" id="lhint">未在名单中的邮箱无法登录，如需开通请联系管理员</div>
+    <button class="lbtn" onclick="loginStep()">登录看板</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
@@ -210,6 +199,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     <div class="hdr-r">
       <span class="hdr-time">最近更新：<strong id="lupd">—</strong></span>
       <button class="btn-set" id="btn-toggle-old" onclick="toggleOldDone()">⚙ 显示全部已完成</button>
+      <button class="btn-log" id="btn-perm" onclick="openPerm()" style="display:none">👥 权限管理</button>
       <button class="btn-log" id="btn-log" onclick="openLog()" style="display:none">📋 操作日志</button>
       <button class="lout" id="login-btn" onclick="showLogin()">登录</button>
     </div>
@@ -385,8 +375,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
   <div class="mbox">
     <h3 id="pub-title">✏️ 填写事项进展</h3>
     <input type="hidden" id="pub-id">
-    <div style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1b5e20;margin-bottom:16px">无需登录，任何参与人均可填写进展或认领责任</div>
-    <div class="fg"><label>您的姓名 *</label><input id="pub-name" placeholder="请输入您的姓名，如：赵云飞"></div>
+    <div style="background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1b5e20;margin-bottom:16px">以 <strong id="pub-whoami">—</strong> 身份提交，可填写进展或认领责任</div>
     <div class="fg"><label>认领/更新责任人（填写即认领，留空保持原责任人）</label><input id="pub-person" placeholder="填写您的名字即可认领，多人用&分隔"></div>
     <div class="fg"><label>进展说明 *</label><textarea id="pub-progress" rows="4" placeholder="请填写最新进展情况..."></textarea></div>
     <div class="fg"><label>提交物（文档链接/具体方案）</label><input id="pub-url" placeholder="如：https://docs.xxx.com/..."></div>
@@ -454,6 +443,8 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <option value="新增事项">新增事项</option>
         <option value="删除事项">删除事项</option>
         <option value="批量导入">批量导入</option>
+        <option value="新增权限">新增权限</option>
+        <option value="删除权限">删除权限</option>
         <option value="登录">登录</option>
       </select>
       <span id="log-count" style="font-size:12px;color:#888;margin-left:4px"></span>
@@ -468,58 +459,86 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
   </div>
 </div>
 
+<!-- 权限管理Modal -->
+<div class="log-modal" id="perm-modal">
+  <div class="log-box" style="width:600px">
+    <div class="log-hdr">
+      <span>👥 权限管理（登录白名单）</span>
+      <button class="log-close" onclick="closePerm()">✕</button>
+    </div>
+    <div style="padding:14px 18px 6px">
+      <div style="background:#e8f0fe;border-left:4px solid #1a3a8f;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a8f;margin-bottom:14px">只有下方名单里的邮箱才能登录看板；勾选"管理员"可赋予新增/编辑/删除等全部权限，否则为普通责任人权限。</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <input id="perm-name" placeholder="姓名" style="flex:1;min-width:90px;padding:8px 10px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit">
+        <input id="perm-email" placeholder="邮箱" style="flex:1.6;min-width:160px;padding:8px 10px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#555;white-space:nowrap"><input type="checkbox" id="perm-admin" style="width:auto">设为管理员</label>
+        <button class="bsave" style="padding:8px 16px;font-size:12px" onclick="addPerm()">＋ 添加</button>
+      </div>
+    </div>
+    <div class="log-body" style="padding:0 18px 16px">
+      <div id="perm-list"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-var S = {role:null, name:'', token:'', showAllDone:false};
+var S = {role:null, name:'', email:'', token:'', showAllDone:false};
 try { S.showAllDone = localStorage.getItem('kanban_showAllDone')==='1'; } catch(e){}
 var DATA = [];
 var FIL = 'all';
 var _allLogs = [];
 var _batchData = [];
+var _needPw = false;
 
-/* ─── 登录 ─── */
-function swTab(t) {
-  document.getElementById('t1').className = 'tab' + (t==='person' ? ' on' : '');
-  document.getElementById('t2').className = 'tab' + (t==='admin'  ? ' on' : '');
-  document.getElementById('tp').style.display = t==='person' ? '' : 'none';
-  document.getElementById('ta').style.display = t==='admin'  ? '' : 'none';
-  document.getElementById('lerr').textContent = '';
-}
-function skipLogin() {
-  document.getElementById('login').style.display = 'none';
-}
+/* ─── 登录（仅授权邮箱，管理员邮箱需二次输入密码） ─── */
 function showLogin() {
   document.getElementById('lerr').textContent = '';
   document.getElementById('login').style.display = 'flex';
 }
-function loginPerson() {
-  var n = document.getElementById('iname').value.trim();
-  if (!n) { document.getElementById('lerr').textContent = '请输入姓名'; return; }
-  S = {role:'person', name:n, token:'', showAllDone:S.showAllDone};
-  enter();
-}
-function loginAdmin() {
-  var pw = document.getElementById('ipw').value;
-  fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if (d.ok) { S = {role:'admin', name:'管理员', token:d.token, showAllDone:S.showAllDone}; enter(); }
-    else { document.getElementById('lerr').textContent = d.msg || '密码错误'; }
-  }).catch(function(){ document.getElementById('lerr').textContent = '连接失败'; });
+function loginStep() {
+  var email = document.getElementById('ilemail').value.trim().toLowerCase();
+  if (!email) { document.getElementById('lerr').textContent = '请输入邮箱'; return; }
+  var body = {email: email};
+  if (_needPw) body.password = document.getElementById('ilpw').value;
+  document.getElementById('lerr').textContent = '';
+  fetch('/api/auth', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)})
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    if (d.need_password) {
+      _needPw = true;
+      document.getElementById('ilpw').style.display = '';
+      document.getElementById('lhint').textContent = '该邮箱为管理员账号，请输入管理员密码';
+      document.getElementById('ilpw').focus();
+      return;
+    }
+    if (d.ok) {
+      S = {role:d.role, name:d.name, email:email, token:d.token, showAllDone:S.showAllDone};
+      try { localStorage.setItem('kanban_session', JSON.stringify({role:S.role,name:S.name,email:S.email,token:S.token})); } catch(e){}
+      _needPw = false;
+      enter();
+      load();
+    } else {
+      document.getElementById('lerr').textContent = d.msg || '登录失败';
+    }
+  }).catch(function(){ document.getElementById('lerr').textContent = '连接失败，请检查网络'; });
 }
 function enter() {
   document.getElementById('login').style.display = 'none';
+  document.getElementById('ilpw').style.display = 'none';
+  document.getElementById('ilpw').value = '';
+  document.getElementById('lhint').textContent = '未在名单中的邮箱无法登录，如需开通请联系管理员';
   var b = document.getElementById('rbadge');
   var btn = document.getElementById('login-btn');
   if (S.role === 'admin') {
-    b.textContent = '管理员'; b.className = 'badge b-admin';
+    b.textContent = '管理员 · ' + S.name; b.className = 'badge b-admin';
     document.getElementById('badd').style.display = '';
     document.getElementById('btpl').style.display = '';
     document.getElementById('bbatch').style.display = '';
     document.getElementById('btn-log').style.display = '';
+    document.getElementById('btn-perm').style.display = '';
     document.getElementById('bmine').style.display = 'none';
-    btn.textContent = '退出'; btn.onclick = doLogout;
   } else {
     b.textContent = '👤 ' + S.name; b.className = 'badge b-person';
     document.getElementById('bmine').style.display = '';
@@ -527,27 +546,35 @@ function enter() {
     document.getElementById('btpl').style.display = 'none';
     document.getElementById('bbatch').style.display = 'none';
     document.getElementById('btn-log').style.display = 'none';
-    btn.textContent = '退出'; btn.onclick = doLogout;
+    document.getElementById('btn-perm').style.display = 'none';
   }
+  btn.textContent = '退出'; btn.onclick = doLogout;
   renderDetail();
 }
 function doLogout() {
-  S = {role:null, name:'', token:'', showAllDone:S.showAllDone};
-  var b = document.getElementById('rbadge');
-  b.textContent = '游客'; b.className = 'badge b-guest';
-  var btn = document.getElementById('login-btn');
-  btn.textContent = '登录'; btn.onclick = showLogin;
+  S = {role:null, name:'', email:'', token:'', showAllDone:S.showAllDone};
+  try { localStorage.removeItem('kanban_session'); } catch(e){}
+  DATA = [];
+  var tb = document.getElementById('dtbody'); if (tb) tb.innerHTML = '';
+  var rtb = document.getElementById('rdtbody'); if (rtb) rtb.innerHTML = '';
   document.getElementById('badd').style.display = 'none';
   document.getElementById('btpl').style.display = 'none';
   document.getElementById('bbatch').style.display = 'none';
   document.getElementById('btn-log').style.display = 'none';
+  document.getElementById('btn-perm').style.display = 'none';
   document.getElementById('bmine').style.display = 'none';
-  renderDetail();
+  document.getElementById('ilemail').value = '';
+  showLogin();
 }
 
 /* ─── 数据 ─── */
 function load() {
-  fetch('/api/data').then(function(r){return r.json();}).then(function(d){
+  if (!S.token) return;
+  fetch('/api/data', {headers:{'X-Session': S.token}}).then(function(r){
+    if (r.status === 401) { doLogout(); return null; }
+    return r.json();
+  }).then(function(d){
+    if (!d) return;
     DATA = d;
     var now = new Date();
     document.getElementById('lupd').textContent = now.getFullYear()+'-'+p2(now.getMonth()+1)+'-'+p2(now.getDate())+' '+p2(now.getHours())+':'+p2(now.getMinutes());
@@ -804,8 +831,7 @@ function saveM() {
       recur_note: document.getElementById('ernote').value
     });
   }
-  var hdrs = {'Content-Type':'application/json','X-Person':encodeURIComponent(S.name)};
-  if (adm) hdrs['X-Admin-Token'] = S.token;
+  var hdrs = {'Content-Type':'application/json','X-Session':S.token};
   var url = id ? ('/api/update/'+id) : '/api/add';
   fetch(url, {method:'POST', headers:hdrs, body:JSON.stringify(body)})
   .then(function(r){return r.json();})
@@ -814,7 +840,7 @@ function saveM() {
 }
 function delRow(id) {
   if (!confirm('确认删除该事项？')) return;
-  fetch('/api/delete/'+id, {method:'DELETE', headers:{'X-Admin-Token':S.token}})
+  fetch('/api/delete/'+id, {method:'DELETE', headers:{'X-Session':S.token}})
   .then(function(r){return r.json();})
   .then(function(d){ if(d.ok){showT('已删除','ok');load();} else showT('删除失败','err'); });
 }
@@ -825,7 +851,7 @@ function openPublic(id) {
   if (!row) return;
   document.getElementById('pub-id').value = id;
   document.getElementById('pub-title').textContent = '✏️ 填写进展：'+row.item;
-  document.getElementById('pub-name').value = '';
+  document.getElementById('pub-whoami').textContent = S.name;
   document.getElementById('pub-person').value = '';
   document.getElementById('pub-progress').value = row.progress || '';
   document.getElementById('pub-url').value = '';
@@ -835,18 +861,16 @@ function openPublic(id) {
 function closePub() { document.getElementById('pub-modal').className = 'mbg'; }
 function savePub() {
   var id       = document.getElementById('pub-id').value;
-  var name     = document.getElementById('pub-name').value.trim();
   var person   = document.getElementById('pub-person').value.trim();
   var progress = document.getElementById('pub-progress').value.trim();
   var url      = document.getElementById('pub-url').value.trim();
   var status   = document.getElementById('pub-status').value;
-  if (!name)     { showT('请填写您的姓名','err'); return; }
   if (!progress) { showT('请填写进展内容','err'); return; }
-  var body = {progress:progress, caller:name};
+  var body = {progress:progress};
   if (person) body.person = person;
   if (url)    body.submit_url = url;
   if (status) body.status = status;
-  fetch('/api/public_update/'+id, {method:'POST', headers:{'Content-Type':'application/json','X-Person':encodeURIComponent(name)}, body:JSON.stringify(body)})
+  fetch('/api/public_update/'+id, {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify(body)})
   .then(function(r){return r.json();})
   .then(function(d){ if(d.ok){closePub();showT('提交成功！','ok');load();} else showT(d.msg||'提交失败','err'); })
   .catch(function(){ showT('提交失败，请检查网络','err'); });
@@ -854,8 +878,14 @@ function savePub() {
 
 /* ─── 批量上传 ─── */
 function downloadTemplate() {
-  var a = document.createElement('a'); a.href='/api/template'; a.download='事项明细模板.xlsx';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  fetch('/api/template', {headers:{'X-Session':S.token}})
+  .then(function(r){ if(!r.ok) throw new Error('下载失败'); return r.blob(); })
+  .then(function(blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download='事项明细模板.xlsx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }).catch(function(){ showT('模板下载失败','err'); });
 }
 function openBatch() {
   _batchData = [];
@@ -878,7 +908,7 @@ function handleFile(file) {
   reader.onload = function(e) {
     var b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(e.target.result)));
     fetch('/api/batch_add', {
-      method:'POST', headers:{'Content-Type':'application/json','X-Admin-Token':S.token},
+      method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token},
       body: JSON.stringify({file_base64:b64, parse_only:true})
     }).then(function(r){return r.json();})
     .then(function(d){
@@ -901,7 +931,7 @@ function showPreview(rows) {
 function doUpload() {
   if (!_batchData.length) return;
   document.getElementById('btn-do-upload').textContent = '导入中...';
-  fetch('/api/batch_add', {method:'POST', headers:{'Content-Type':'application/json','X-Admin-Token':S.token}, body:JSON.stringify(_batchData)})
+  fetch('/api/batch_add', {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify(_batchData)})
   .then(function(r){return r.json();})
   .then(function(d){
     document.getElementById('btn-do-upload').textContent = '✅ 确认导入';
@@ -919,7 +949,7 @@ function openLog() {
   document.getElementById('log-search').value = '';
   document.getElementById('log-action-filter').value = '';
   document.getElementById('log-modal').className = 'log-modal show';
-  fetch('/api/log', {headers:{'X-Admin-Token':S.token}})
+  fetch('/api/log', {headers:{'X-Session':S.token}})
   .then(function(r){return r.json();})
   .then(function(d){ _allLogs = Array.isArray(d)?d:[]; renderLog(); })
   .catch(function(){ document.getElementById('log-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#c62828;padding:20px">日志加载失败</td></tr>'; });
@@ -938,13 +968,63 @@ function renderLog() {
   var em = document.getElementById('log-empty');
   if (!rows.length) { tb.innerHTML=''; em.style.display=''; return; }
   em.style.display = 'none';
-  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','登录':'la-login'};
+  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','登录':'la-login'};
   tb.innerHTML = rows.map(function(r){
     return '<tr><td style="white-space:nowrap">'+r.time+'</td><td><strong>'+r.operator+'</strong></td>'+
       '<td><span class="'+(acls[r.action]||'la-edit')+'">'+r.action+'</span></td>'+
       '<td style="text-align:center">'+(r.item_id||'—')+'</td>'+
       '<td>'+(r.item_name||'—')+'</td><td style="color:#555">'+(r.detail||'—')+'</td></tr>';
   }).join('');
+}
+
+/* ─── 权限管理（登录白名单） ─── */
+function openPerm() {
+  document.getElementById('perm-modal').className = 'log-modal show';
+  loadPerm();
+}
+function closePerm() { document.getElementById('perm-modal').className = 'log-modal'; }
+function loadPerm() {
+  fetch('/api/contacts', {headers:{'X-Session':S.token}})
+  .then(function(r){ return r.json(); })
+  .then(function(list){
+    var el = document.getElementById('perm-list');
+    if (!list.length) { el.innerHTML = '<div style="text-align:center;color:#bbb;padding:24px">暂无授权名单</div>'; return; }
+    el.innerHTML = list.map(function(c){
+      var badge = c.role==='admin'
+        ? '<span class="badge b-admin" style="font-size:11px;padding:2px 9px">管理员</span>'
+        : '<span style="color:#999;font-size:12px">责任人</span>';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;font-size:13px">'+
+        '<span style="flex:1;font-weight:600">'+c.name+'</span>'+
+        '<span style="flex:1.6;color:#666">'+c.email+'</span>'+
+        '<span style="width:56px;text-align:center">'+badge+'</span>'+
+        '<button class="bd" onclick="delPerm(\''+c.email.replace(/'/g,"\\'")+'\')">🗑</button></div>';
+    }).join('');
+  })
+  .catch(function(){ document.getElementById('perm-list').innerHTML = '<div style="text-align:center;color:#c62828;padding:24px">加载失败</div>'; });
+}
+function addPerm() {
+  var name  = document.getElementById('perm-name').value.trim();
+  var email = document.getElementById('perm-email').value.trim().toLowerCase();
+  var role  = document.getElementById('perm-admin').checked ? 'admin' : 'person';
+  if (!name || !email) { showT('请填写姓名和邮箱','err'); return; }
+  fetch('/api/contacts', {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify({name:name,email:email,role:role})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) {
+      showT('已添加授权','ok');
+      document.getElementById('perm-name').value = '';
+      document.getElementById('perm-email').value = '';
+      document.getElementById('perm-admin').checked = false;
+      loadPerm();
+    } else showT(d.msg || '添加失败', 'err');
+  }).catch(function(){ showT('请求失败','err'); });
+}
+function delPerm(email) {
+  if (!confirm('确认移除该邮箱的登录权限？移除后该邮箱将无法再登录看板。')) return;
+  fetch('/api/contacts/'+encodeURIComponent(email), {method:'DELETE', headers:{'X-Session':S.token}})
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if (d.ok) { showT('已移除','ok'); loadPerm(); } else showT(d.msg || '移除失败','err'); })
+  .catch(function(){ showT('请求失败','err'); });
 }
 
 /* ─── Toast & 时钟 ─── */
@@ -966,19 +1046,31 @@ function tick() {
 }
 
 /* ─── 初始化 ─── */
-document.getElementById('iname').onkeydown = function(e){ if(e.key==='Enter') loginPerson(); };
-document.getElementById('ipw').onkeydown   = function(e){ if(e.key==='Enter') loginAdmin(); };
+document.getElementById('ilemail').onkeydown = function(e){ if(e.key==='Enter') loginStep(); };
+document.getElementById('ilpw').onkeydown    = function(e){ if(e.key==='Enter') loginStep(); };
 document.getElementById('modal').onclick    = function(e){ if(e.target===this) closeM(); };
 document.getElementById('pub-modal').onclick= function(e){ if(e.target===this) closePub(); };
 document.getElementById('batch-modal').onclick=function(e){ if(e.target===this) closeBatch(); };
 document.getElementById('log-modal').onclick= function(e){ if(e.target===this) closeLog(); };
+document.getElementById('perm-modal').onclick=function(e){ if(e.target===this) closePerm(); };
 (function(){
   var btn = document.getElementById('btn-toggle-old');
   btn.textContent = S.showAllDone ? '⚙ 隐藏旧的已完成事项' : '⚙ 显示全部已完成';
   btn.classList.toggle('on', S.showAllDone);
 })();
 
-load();
+/* 尝试恢复本地保存的登录状态，否则显示登录框（保密要求：不允许游客免登录查看） */
+(function initSession(){
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('kanban_session')||'null'); } catch(e){}
+  if (saved && saved.token && saved.email) {
+    S = {role:saved.role, name:saved.name, email:saved.email, token:saved.token, showAllDone:S.showAllDone};
+    enter();
+    load();
+  } else {
+    showLogin();
+  }
+})();
 setInterval(load, 30000);
 setInterval(tick, 1000);
 tick();
