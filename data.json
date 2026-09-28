@@ -10,7 +10,9 @@
     "progress": "初次已经提交",
     "submit_url": "https://www.kdocs.cn/l/chcPb0L1SJnl",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 2,
@@ -23,7 +25,9 @@
     "progress": "初次已经提交",
     "submit_url": "Mid360L专题计划：Mid360L推广专题-北斗-2026年7月2日",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 3,
@@ -36,7 +40,9 @@
     "progress": "Mid-360L 新品培训&考试计划：\nLivox 培训时间：7.30 日下午 15:00 ~ 17:00 （原厂培训）\n考试时间：8月6日、8月13日、8月20日、8月27日 \n培训&考试对象：技术+销售全员",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 4,
@@ -51,7 +57,8 @@
     "status": "完成",
     "livox_confirm": "未完成",
     "updated_at": "2026-09-18 10:05",
-    "updated_by": "Dandy.chen"
+    "updated_by": "Dandy.chen",
+    "priority": "中"
   },
   {
     "id": 5,
@@ -64,7 +71,9 @@
     "progress": "初次晾晒完成，后续每周一更新",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 6,
@@ -77,7 +86,9 @@
     "progress": "7月20日已经完成表3竞品公司信息表\n后续每周更新",
     "submit_url": "竞品信息：https://www.kdocs.cn/l/ca8lXebPKhmq",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 7,
@@ -90,7 +101,9 @@
     "progress": "完成/邮件发送",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 8,
@@ -103,7 +116,9 @@
     "progress": "完成/邮件发送",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 9,
@@ -116,7 +131,9 @@
     "progress": "完成",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 10,
@@ -129,7 +146,9 @@
     "progress": "由于初期无明显指向，已完成初次汇总体现，后续具体客户反馈持续按表格更新。",
     "submit_url": "https://www.kdocs.cn/l/chcPb0L1SJnl",
     "status": "完成",
-    "livox_confirm": "完成"
+    "livox_confirm": "完成",
+    "priority": "中",
+    "completed_at": "2026-09-28 07:32"
   },
   {
     "id": 11,
@@ -144,7 +163,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-08-31 06:44",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-08-31 06:44"
   },
   {
     "id": 12,
@@ -159,7 +180,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 13,
@@ -174,7 +197,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 14,
@@ -189,7 +214,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 15,
@@ -204,7 +231,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 16,
@@ -219,7 +248,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 17,
@@ -234,7 +265,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:07",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:07"
   },
   {
     "id": 18,
@@ -249,7 +282,9 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:06",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:06"
   },
   {
     "id": 19,
@@ -264,6 +299,8 @@
     "status": "完成",
     "livox_confirm": "完成",
     "updated_at": "2026-09-18 10:06",
-    "updated_by": "管理员"
+    "updated_by": "管理员",
+    "priority": "中",
+    "completed_at": "2026-09-18 10:06"
   }
 ]
