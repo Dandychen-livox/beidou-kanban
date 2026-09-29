@@ -345,15 +345,34 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
           <select id="epr"><option value="高">🔴 高</option><option value="中">🟡 中</option><option value="低">🟢 低</option></select>
         </div>
       </div>
-      <div class="frow">
-        <div class="fg" style="flex:0 0 140px;display:flex;align-items:flex-end;padding-bottom:9px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#333;font-weight:400;margin:0">
-            <input type="checkbox" id="erecur" style="width:auto" onchange="toggleRecurField()"> 重复性待办
-          </label>
+      <div class="fg" style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="erecur" style="width:auto" onchange="toggleRecurField()">
+        <label style="margin:0;font-weight:400;font-size:13px;color:#333">重复性待办（周期性事项）</label>
+      </div>
+      <div id="recur-field" style="display:none;background:#f5f8ff;border:1px solid #dde3f0;border-radius:8px;padding:13px 13px 4px;margin-bottom:13px">
+        <div class="frow">
+          <div class="fg">
+            <label>重复周期</label>
+            <select id="erectype" onchange="onRecurTypeChange()">
+              <option value="每周">每周</option>
+              <option value="每双周">每双周（隔周）</option>
+              <option value="每月">每月</option>
+              <option value="每季度">每季度</option>
+              <option value="自定义">自定义</option>
+            </select>
+          </div>
+          <div class="fg" id="erecval-wrap">
+            <label id="erecval-label">时间节点</label>
+            <select id="erecval" onchange="updateRecurPreview()"></select>
+          </div>
         </div>
-        <div class="fg" id="recur-field" style="display:none">
-          <label>周期说明</label>
-          <input id="ernote" placeholder="如：每月31日 / 每周一">
+        <div class="fg" id="ernote-wrap" style="display:none">
+          <label>自定义周期说明</label>
+          <input id="ernote" placeholder="如：每两周的周五" oninput="updateRecurPreview()">
+        </div>
+        <div style="font-size:12px;color:#555;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <span>周期预览：<b id="erecpreview" style="color:#1a3a8f">—</b></span>
+          <button type="button" class="be" style="padding:3px 10px;font-size:12px" onclick="calcNextDdl()">按周期填充下次到期日</button>
         </div>
       </div>
       <div class="fg"><label>提交物链接</label><input id="eu" placeholder="https://..."></div>
@@ -819,13 +838,121 @@ function openEdit(id) {
     document.getElementById('eu').value = row.submit_url || '';
     document.getElementById('epr').value = priorityOf(row);
     document.getElementById('erecur').checked = !!row.recurring;
-    document.getElementById('ernote').value = row.recur_note || '';
+    setRecurFields(row.recur_type, row.recur_value, row.recur_note);
     toggleRecurField();
   }
   document.getElementById('modal').className = 'mbg show';
 }
 function toggleRecurField() {
-  document.getElementById('recur-field').style.display = document.getElementById('erecur').checked ? '' : 'none';
+  var on = document.getElementById('erecur').checked;
+  document.getElementById('recur-field').style.display = on ? '' : 'none';
+  if (on && !document.getElementById('erecval').options.length) onRecurTypeChange();
+  if (on) updateRecurPreview();
+}
+var RECUR_WEEKDAYS = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+function fillRecurOptions(type, keepValue) {
+  var sel = document.getElementById('erecval');
+  var wrap = document.getElementById('erecval-wrap');
+  var label = document.getElementById('erecval-label');
+  var noteWrap = document.getElementById('ernote-wrap');
+  sel.innerHTML = '';
+  if (type === '自定义') {
+    wrap.style.display = 'none';
+    noteWrap.style.display = '';
+    return;
+  }
+  wrap.style.display = '';
+  noteWrap.style.display = 'none';
+  var opts = [];
+  if (type === '每周' || type === '每双周') {
+    label.textContent = '星期几';
+    for (var i = 1; i <= 7; i++) opts.push([String(i), RECUR_WEEKDAYS[i]]);
+  } else {
+    label.textContent = '每月几号';
+    for (var d = 1; d <= 31; d++) opts.push([String(d), d + '日']);
+    opts.push(['last', '月末最后一天']);
+  }
+  opts.forEach(function(o){
+    var op = document.createElement('option');
+    op.value = o[0]; op.textContent = o[1];
+    if (keepValue !== undefined && String(keepValue) === o[0]) op.selected = true;
+    sel.appendChild(op);
+  });
+}
+function onRecurTypeChange() {
+  fillRecurOptions(document.getElementById('erectype').value);
+  updateRecurPreview();
+}
+function recurNoteFrom(type, value, custom) {
+  if (type === '自定义') return (custom || '').trim();
+  if (!value) return type;
+  if (type === '每周' || type === '每双周') return type + RECUR_WEEKDAYS[parseInt(value, 10)];
+  return type + (value === 'last' ? '最后一天' : (value + '日'));
+}
+function updateRecurPreview() {
+  var type = document.getElementById('erectype').value;
+  var value = document.getElementById('erecval').value;
+  var custom = document.getElementById('ernote').value;
+  var note = recurNoteFrom(type, value, custom);
+  document.getElementById('erecpreview').textContent = note || '—';
+}
+function setRecurFields(type, value, note) {
+  type = type || (note ? '自定义' : '每周');
+  document.getElementById('erectype').value = type;
+  if (type === '自定义') {
+    fillRecurOptions(type);
+    document.getElementById('ernote').value = note || '';
+  } else {
+    fillRecurOptions(type, value || (type === '每周' || type === '每双周' ? '5' : '1'));
+  }
+  updateRecurPreview();
+}
+function isoWeekday(d) { var w = d.getDay(); return w === 0 ? 7 : w; }
+function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+function fmtDate(d) { return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+function computeNextRecur(type, value) {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var y = today.getFullYear(), mo = today.getMonth();
+  function mk(yy, mm) {
+    var dim = daysInMonth(yy, mm + 1);
+    var day = (value === 'last') ? dim : Math.min(parseInt(value, 10) || 1, dim);
+    return new Date(yy, mm, day);
+  }
+  if (type === '每周' || type === '每双周') {
+    var target = parseInt(value, 10) || 1;
+    var add = (target - isoWeekday(today) + 7) % 7;
+    var d = new Date(today); d.setDate(d.getDate() + add);
+    return d;
+  }
+  if (type === '每月') {
+    var c = mk(y, mo);
+    if (c < today) { var nm = mo + 1, ny = y; if (nm > 11) { nm = 0; ny++; } c = mk(ny, nm); }
+    return c;
+  }
+  if (type === '每季度') {
+    var qm = mo; while (qm % 3 !== 0) qm++;
+    var qy = y; if (qm > 11) { qm -= 12; qy++; }
+    var c2 = mk(qy, qm);
+    if (c2 < today) { qm += 3; if (qm > 11) { qm -= 12; qy++; } c2 = mk(qy, qm); }
+    return c2;
+  }
+  return null;
+}
+function calcNextDdl() {
+  var type = document.getElementById('erectype').value;
+  if (type === '自定义') { showT('自定义周期无法自动计算，请手动填写 DDL', 'err'); return; }
+  var d = computeNextRecur(type, document.getElementById('erecval').value);
+  if (!d) { showT('无法计算，请手动填写 DDL', 'err'); return; }
+  document.getElementById('ed').value = fmtDate(d);
+  showT('已按周期填入下次到期日：' + fmtDate(d), 'ok');
+}
+function collectRecurFields() {
+  var recurring = document.getElementById('erecur').checked;
+  if (!recurring) return {recurring: false, recur_type: '', recur_value: '', recur_note: ''};
+  var type = document.getElementById('erectype').value;
+  var value = type === '自定义' ? '' : document.getElementById('erecval').value;
+  var custom = document.getElementById('ernote').value;
+  return {recurring: true, recur_type: type, recur_value: value, recur_note: recurNoteFrom(type, value, custom)};
 }
 function openAdd() {
   document.getElementById('eid').value = '';
@@ -837,6 +964,7 @@ function openAdd() {
   document.getElementById('elc').value = '未完成';
   document.getElementById('epr').value = '中';
   document.getElementById('erecur').checked = false;
+  setRecurFields('每周', '5', '');
   toggleRecurField();
   document.getElementById('modal').className = 'mbg show';
 }
@@ -852,10 +980,9 @@ function saveM() {
       livox: document.getElementById('el').value, submit: document.getElementById('es').value,
       ddl:  document.getElementById('ed').value, submit_url: document.getElementById('eu').value,
       livox_confirm: document.getElementById('elc').value,
-      priority: document.getElementById('epr').value,
-      recurring: document.getElementById('erecur').checked,
-      recur_note: document.getElementById('ernote').value
+      priority: document.getElementById('epr').value
     });
+    Object.assign(body, collectRecurFields());
   }
   var hdrs = {'Content-Type':'application/json','X-Session':S.token};
   var url = id ? ('/api/update/'+id) : '/api/add';

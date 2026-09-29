@@ -425,10 +425,15 @@ def _migrate_data():
         if 'initiator' not in row:
             row['initiator'] = ''
             changed = True
+        if 'recur_type' not in row:
+            row['recur_type'] = ''
+            changed = True
+        if 'recur_value' not in row:
+            row['recur_value'] = ''
+            changed = True
     if changed:
         write_data(rows)
         print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at/recurring/initiator 字段', flush=True)
-
 _migrate_data()
 
 # ── 路由 ──
@@ -749,6 +754,8 @@ def api_add():
             'livox':        body.get('livox', 'Dandy'),
             'priority':     norm_priority(body.get('priority', '中')),
             'recurring':    norm_bool(body.get('recurring', False)),
+            'recur_type':   body.get('recur_type', ''),
+            'recur_value':  body.get('recur_value', ''),
             'recur_note':   body.get('recur_note', ''),
             'progress':     '',
             'submit_url':   body.get('submit_url', ''),
@@ -884,14 +891,15 @@ def api_export():
     """一键备份：把当前全部事项导出为 Excel，供管理员下载存档"""
     if not is_admin(request): abort(403)
     rows = read_data()
-    headers = ['ID', '事项名称', '发起人', '类型', '周期说明', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
+    headers = ['ID', '事项名称', '发起人', '类型', '周期说明', '周期类型', '周期节点', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
                '优先级', '进展', '提交物链接', '闭环状态', 'Livox确认', '完成时间(责任人标记)',
                '完成时间(双重确认)', '最近更新时间', '最近更新人', '创建日期']
-    widths = [6, 26, 14, 12, 12, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
+    widths = [6, 26, 14, 12, 12, 10, 10, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
     data_rows = [[
         r.get('id', ''), r.get('item', ''), r.get('initiator', ''),
         '重复性待办' if r.get('recurring') else '待办事项',
-        r.get('recur_note', ''), r.get('submit', ''), r.get('ddl', ''),
+        r.get('recur_note', ''), r.get('recur_type', ''), r.get('recur_value', ''),
+        r.get('submit', ''), r.get('ddl', ''),
         r.get('person', ''), r.get('livox', ''), r.get('priority', '中'),
         r.get('progress', ''), r.get('submit_url', ''), r.get('status', ''),
         r.get('livox_confirm', ''), r.get('status_done_at', ''),
@@ -995,6 +1003,8 @@ def _parse_excel(stream):
         '优先级': 'priority',
         '重复性待办': 'recurring', '是否重复': 'recurring',
         '周期说明': 'recur_note', '周期': 'recur_note',
+        '周期类型': 'recur_type', '重复周期': 'recur_type',
+        '周期节点': 'recur_value', '节点': 'recur_value',
         '进展': 'progress',
         '提交物链接': 'submit_url', '提交物': 'submit_url',
         '闭环状态': 'status', '状态': 'status',
@@ -1029,6 +1039,7 @@ def _do_batch(items):
                 'initiator': item.get('initiator', ''),
                 'livox': item.get('livox', 'Dandy'), 'priority': norm_priority(item.get('priority', '中')),
                 'recurring': norm_bool(item.get('recurring', False)), 'recur_note': item.get('recur_note', ''),
+                'recur_type': item.get('recur_type', ''), 'recur_value': item.get('recur_value', ''),
                 'progress': item.get('progress', ''),
                 'submit_url': item.get('submit_url', ''), 'status': status,
                 'livox_confirm': '未完成',
