@@ -17,7 +17,8 @@
     "recurring": true,
     "recur_note": "每月更新",
     "updated_at": "2026-09-29 11:35",
-    "updated_by": "Dandy.chen"
+    "updated_by": "Dandy.chen",
+    "initiator": ""
   },
   {
     "id": 2,
@@ -37,7 +38,8 @@
     "recurring": true,
     "recur_note": "每周更新",
     "updated_at": "2026-09-29 09:28",
-    "updated_by": "Dandy.chen"
+    "updated_by": "Dandy.chen",
+    "initiator": ""
   },
   {
     "id": 3,
@@ -55,7 +57,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 4,
@@ -75,7 +78,8 @@
     "status_done_at": "2026-09-18 10:05",
     "recurring": false,
     "recur_note": "",
-    "completed_at": "2026-09-29 08:54"
+    "completed_at": "2026-09-29 08:54",
+    "initiator": ""
   },
   {
     "id": 5,
@@ -93,7 +97,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": true,
-    "recur_note": "每周五"
+    "recur_note": "每周五",
+    "initiator": ""
   },
   {
     "id": 6,
@@ -113,7 +118,8 @@
     "recurring": true,
     "recur_note": "每周更新",
     "updated_at": "2026-09-29 09:28",
-    "updated_by": "Dandy.chen"
+    "updated_by": "Dandy.chen",
+    "initiator": ""
   },
   {
     "id": 7,
@@ -131,7 +137,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 8,
@@ -149,7 +156,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 9,
@@ -167,7 +175,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 10,
@@ -185,7 +194,8 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 11,
@@ -205,7 +215,8 @@
     "completed_at": "2026-08-31 06:44",
     "status_done_at": "2026-08-31 06:44",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 12,
@@ -225,7 +236,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 13,
@@ -245,7 +257,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 14,
@@ -265,7 +278,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 15,
@@ -285,7 +299,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 16,
@@ -305,7 +320,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": true,
-    "recur_note": "2026年8月31日"
+    "recur_note": "2026年8月31日",
+    "initiator": ""
   },
   {
     "id": 17,
@@ -325,7 +341,8 @@
     "completed_at": "2026-09-18 10:07",
     "status_done_at": "2026-09-18 10:07",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 18,
@@ -345,7 +362,8 @@
     "completed_at": "2026-09-18 10:06",
     "status_done_at": "2026-09-18 10:06",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   },
   {
     "id": 19,
@@ -365,6 +383,7 @@
     "completed_at": "2026-09-18 10:06",
     "status_done_at": "2026-09-18 10:06",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "initiator": ""
   }
 ]
