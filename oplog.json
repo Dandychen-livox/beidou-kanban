@@ -310,5 +310,13 @@
     "item_id": null,
     "item_name": "kerwin.wang",
     "detail": "邮箱:kerwin.wang@livoxtech.com；角色:管理员"
+  },
+  {
+    "time": "2026-09-29 11:35:01",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 1,
+    "item_name": "Avia2+Mid360L用户声音反馈",
+    "detail": "进展:初次已经提交；状态→完成；Livox确认→完成；责任人→赵云飞；优先级→中"
   }
 ]
