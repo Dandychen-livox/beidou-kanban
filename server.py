@@ -3,7 +3,7 @@
 from flask import Flask, jsonify, request, Response, abort, send_file
 from pathlib import Path
 from datetime import datetime
-import json, re, threading, os, io, base64, hmac, hashlib, time
+import json, re, threading, os, io, base64, hmac, hashlib, time, smtplib
 
 BASE           = Path(__file__).parent
 DATA           = BASE / 'data.json'
@@ -25,6 +25,18 @@ FALLBACK_ADMIN_EMAILS = set(
         'xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,jessica.li@livoxtech.com'
     ).split(',') if e.strip()
 )
+
+# ── 邮件通知配置（全部通过 Render 环境变量注入，不写入代码/仓库） ──
+SMTP_HOST      = os.environ.get('SMTP_HOST', '')
+SMTP_PORT      = int(os.environ.get('SMTP_PORT', '465') or '465')
+SMTP_USER      = os.environ.get('SMTP_USER', '')
+SMTP_PASS      = os.environ.get('SMTP_PASS', '')
+SMTP_SSL       = os.environ.get('SMTP_SSL', '1') == '1'   # 1=SSL(465)，0=STARTTLS(587)
+MAIL_FROM      = os.environ.get('MAIL_FROM', '') or SMTP_USER
+MAIL_FROM_NAME = os.environ.get('MAIL_FROM_NAME', '北斗代理事项闭环看板')
+SITE_URL       = os.environ.get('SITE_URL', 'https://beidou-kanban.onrender.com')
+CRON_SECRET    = os.environ.get('CRON_SECRET', '')        # 定时任务调用密钥
+
 _lock        = threading.Lock()
 _sync_lock   = threading.Lock()   # 防止并发 push
 
@@ -182,6 +194,128 @@ def require_session(req):
     if not sess:
         abort(401)
     return sess
+
+# ── 邮件发送 ──
+def mail_configured():
+    return bool(SMTP_HOST and SMTP_USER and SMTP_PASS)
+
+def send_mail(to_list, subject, html, bcc=False):
+    """发送一封 HTML 邮件。to_list 为收件邮箱列表；bcc=True 时收件人互相不可见。"""
+    to_list = [e for e in dict.fromkeys([ (t or '').strip() for t in (to_list or []) ]) if e]
+    if not to_list:
+        return False, '没有收件人'
+    if not mail_configured():
+        return False, 'SMTP 未配置'
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.header import Header
+    from email.utils import formataddr
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = Header(subject, 'utf-8')
+    msg['From'] = formataddr((str(Header(MAIL_FROM_NAME, 'utf-8')), MAIL_FROM))
+    if bcc:
+        msg['To'] = MAIL_FROM
+    else:
+        msg['To'] = ', '.join(to_list)
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    try:
+        if SMTP_SSL:
+            srv = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=25)
+        else:
+            srv = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=25)
+            srv.ehlo()
+            srv.starttls()
+            srv.ehlo()
+        srv.login(SMTP_USER, SMTP_PASS)
+        srv.sendmail(MAIL_FROM, to_list, msg.as_string())
+        srv.quit()
+        return True, ''
+    except Exception as e:
+        print(f'[mail] 发送失败：{e}', flush=True)
+        return False, str(e)
+
+def email_for_person(name):
+    """把事项里的责任人姓名，映射到通讯录里的邮箱"""
+    name = (name or '').strip()
+    if not name:
+        return None
+    contacts = read_contacts()
+    for c in contacts:  # 先精确匹配
+        cn = (c.get('name') or '').strip()
+        ce = (c.get('email') or '').strip()
+        if ce and cn and cn.lower() == name.lower():
+            return ce
+    for c in contacts:  # 再匹配邮箱前缀
+        ce = (c.get('email') or '').strip()
+        if ce and ce.split('@')[0].lower() == name.lower():
+            return ce
+    for c in contacts:  # 最后做宽松包含匹配
+        cn = (c.get('name') or '').strip().lower()
+        ce = (c.get('email') or '').strip()
+        if not ce or not cn:
+            continue
+        if (len(name) >= 2 and name.lower() in cn) or (len(cn) >= 2 and cn in name.lower()):
+            return ce
+    return None
+
+def all_contact_emails():
+    return [ (c.get('email') or '').strip() for c in read_contacts() if (c.get('email') or '').strip() ]
+
+# ── 统计与到期判断（与前端口径保持一致） ──
+def parse_ddl_date(ddl):
+    s = (ddl or '').strip()
+    if not s:
+        return None
+    m = re.match(r'^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$', s)
+    if not m:
+        return None
+    try:
+        return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).date()
+    except Exception:
+        return None
+
+def ddl_status(row):
+    """返回 ('overdue'|'soon'|'normal'|'none', 剩余天数)。已完成/挂起不算逾期。"""
+    if row.get('status') in ('完成', '挂起'):
+        return ('done', None)
+    d = parse_ddl_date(row.get('ddl'))
+    if d is None:
+        return ('none', None)
+    days = (d - datetime.now().date()).days
+    if days < 0:
+        return ('overdue', days)
+    if days <= 3:
+        return ('soon', days)
+    return ('normal', days)
+
+def is_row_done(row):
+    return row.get('status') == '完成' and row.get('livox_confirm') == '完成'
+
+def split_persons(person):
+    return [p.strip() for p in re.split(r'[&/、,，]', person or '') if p.strip()]
+
+def compute_overall(rows):
+    st = {'total': 0, 'recur': 0, 'todo': 0, 'done': 0, 'hold': 0, 'doing': 0, 'overdue': 0, 'soon': 0, 'normal': 0}
+    for r in rows:
+        st['total'] += 1
+        if r.get('recurring'):
+            st['recur'] += 1
+        else:
+            st['todo'] += 1
+        if is_row_done(r):
+            st['done'] += 1
+        elif r.get('status') == '挂起':
+            st['hold'] += 1
+        else:
+            st['doing'] += 1
+            t, _ = ddl_status(r)
+            if t == 'overdue':
+                st['overdue'] += 1
+            elif t == 'soon':
+                st['soon'] += 1
+            else:
+                st['normal'] += 1
+    return st
 
 # ── 操作日志 ──
 def read_log():
@@ -381,6 +515,155 @@ def api_contacts_del(email):
         write_contacts(remain)
     add_log(get_caller(request), '删除权限', None, None, f'邮箱:{email}')
     return jsonify({'ok': True})
+
+# ── 邮件通知：周报 & DDL 提醒 ──
+def _cron_ok(req):
+    """定时任务鉴权：校验 CRON_SECRET，或管理员登录态（便于手动触发测试）"""
+    secret = req.headers.get('X-Cron-Secret', '') or req.args.get('secret', '')
+    if CRON_SECRET and secret and hmac.compare_digest(secret, CRON_SECRET):
+        return True
+    return is_admin(req)
+
+def _mail_style():
+    return ("body{font-family:'Microsoft YaHei',Arial,sans-serif;font-size:14px;color:#222}"
+            "table{border-collapse:collapse;width:100%;margin:10px 0}"
+            "th{background:#1a3a8f;color:#fff;padding:8px 10px;font-size:13px;text-align:center}"
+            "td{border:1px solid #e5eaf5;padding:7px 10px;font-size:13px;text-align:center}"
+            "td.l{text-align:left}.red{color:#c62828;font-weight:700}.orange{color:#ef6c00;font-weight:700}"
+            ".green{color:#2e7d32;font-weight:700}.title{font-size:17px;font-weight:700;color:#1a3a8f}"
+            ".sub{color:#888;font-size:12px;margin:6px 0 14px}")
+
+def build_weekly_html(rows):
+    st = compute_overall(rows)
+    person_map = {}
+    for r in rows:
+        for name in split_persons(r.get('person')):
+            m = person_map.setdefault(name, {'total': 0, 'done': 0, 'doing': 0, 'overdue': 0, 'soon': 0})
+            m['total'] += 1
+            if is_row_done(r):
+                m['done'] += 1
+            elif r.get('status') != '挂起':
+                m['doing'] += 1
+                t, _ = ddl_status(r)
+                if t == 'overdue':
+                    m['overdue'] += 1
+                elif t == 'soon':
+                    m['soon'] += 1
+    today = datetime.now().strftime('%Y-%m-%d')
+    rows_html = ''.join(
+        f'<tr><td class="l">{n}</td><td>{m["total"]}</td><td>{m["done"]}</td>'
+        f'<td>{m["doing"]}</td><td class="{"red" if m["overdue"] else ""}">{m["overdue"]}</td>'
+        f'<td class="{"orange" if m["soon"] else ""}">{m["soon"]}</td></tr>'
+        for n, m in sorted(person_map.items())
+    )
+    return f"""<html><head><style>{_mail_style()}</style></head><body>
+<div class="title">【北斗代理事项闭环看板】本周待办完成情况</div>
+<div class="sub">统计日期：{today} ｜ 数据来源：<a href="{SITE_URL}">{SITE_URL}</a></div>
+<table>
+<tr><th>待办总数</th><th>待办事项</th><th>重复性待办</th><th>已完成</th><th>挂起</th><th>进行中</th><th>逾期</th><th>临期(≤3天)</th></tr>
+<tr><td>{st['total']}</td><td>{st['todo']}</td><td>{st['recur']}</td>
+<td class="green">{st['done']}</td><td>{st['hold']}</td><td>{st['doing']}</td>
+<td class="red">{st['overdue']}</td><td class="orange">{st['soon']}</td></tr>
+</table>
+<div style="margin-top:16px;font-weight:700">按责任人统计</div>
+<table>
+<tr><th>责任人</th><th>待办总数</th><th>已完成</th><th>进行中</th><th>逾期</th><th>临期</th></tr>
+{rows_html}
+</table>
+<div class="sub">注：已完成 = 责任人标记完成且对接人确认完成；逾期 = 已过 DDL 且未完成。</div>
+</body></html>"""
+
+def collect_reminders(rows):
+    """返回 {责任人: [提醒条目]}。触发条件：距 DDL 恰好 2 天，或已逾期（未完成、未挂起）。"""
+    today = datetime.now().date()
+    result = {}
+    for r in rows:
+        if r.get('status') in ('完成', '挂起'):
+            continue
+        d = parse_ddl_date(r.get('ddl'))
+        if d is None:
+            continue
+        days = (d - today).days
+        if days == 2:
+            kind, label = 'soon', f'还有 2 天到期（{r.get("ddl")}）'
+        elif days < 0:
+            kind, label = 'overdue', f'已逾期 {-days} 天（DDL {r.get("ddl")}）'
+        else:
+            continue
+        for name in split_persons(r.get('person')):
+            result.setdefault(name, []).append({
+                'item': r.get('item', ''), 'ddl': r.get('ddl', ''),
+                'days': days, 'kind': kind, 'label': label,
+                'progress': r.get('progress', ''),
+            })
+    return result
+
+def build_reminder_html(name, items):
+    li = ''.join(
+        f'<tr><td class="l">{it["item"]}</td><td class="l">{it["label"]}</td>'
+        f'<td class="l" style="color:#666">{(it["progress"] or "暂无进展")[:60]}</td></tr>'
+        for it in items
+    )
+    return f"""<html><head><style>{_mail_style()}</style></head><body>
+<div class="title">【待办提醒】以下事项即将到期或已逾期</div>
+<div class="sub">{name} 您好，请及时跟进处理：</div>
+<table><tr><th>事项</th><th>到期情况</th><th>当前进展</th></tr>{li}</table>
+<div class="sub">请登录看板更新进展：<a href="{SITE_URL}">{SITE_URL}</a></div>
+</body></html>"""
+
+@app.route('/api/notify/weekly', methods=['POST', 'GET'])
+def api_notify_weekly():
+    if not _cron_ok(request): abort(403)
+    rows = read_data()
+    recipients = all_contact_emails()
+    if not recipients:
+        return jsonify({'ok': False, 'msg': '通讯录中没有邮箱'}), 400
+    subject = f'【北斗看板】本周待办完成情况（{datetime.now().strftime("%Y-%m-%d")}）'
+    ok, err = send_mail(recipients, subject, build_weekly_html(rows), bcc=True)
+    add_log('系统', '发送周报', None, None, f'收件{len(recipients)}人；{"成功" if ok else "失败:" + err}')
+    return jsonify({'ok': ok, 'recipients': len(recipients), 'msg': err})
+
+@app.route('/api/notify/reminders', methods=['POST', 'GET'])
+def api_notify_reminders():
+    if not _cron_ok(request): abort(403)
+    rows = read_data()
+    grouped = collect_reminders(rows)
+    sent, skipped, failed = 0, [], []
+    for name, items in grouped.items():
+        email = email_for_person(name)
+        if not email:
+            skipped.append(name)
+            continue
+        subject = f'【待办提醒】{name} 有 {len(items)} 项待办临近/逾期'
+        ok, err = send_mail([email], subject, build_reminder_html(name, items))
+        if ok:
+            sent += 1
+        else:
+            failed.append(name)
+    detail = f'通知{len(grouped)}人，成功{sent}'
+    if skipped:
+        detail += f'；未匹配邮箱:{"/".join(skipped)}'
+    if failed:
+        detail += f'；发送失败:{"/".join(failed)}'
+    add_log('系统', '发送DDL提醒', None, None, detail)
+    return jsonify({'ok': True, 'notified_people': len(grouped), 'sent': sent,
+                    'skipped_no_email': skipped, 'failed': failed})
+
+@app.route('/api/notify/test', methods=['POST'])
+def api_notify_test():
+    sess = require_session(request)
+    if sess['role'] != 'admin': abort(403)
+    if not mail_configured():
+        return jsonify({'ok': False, 'msg': '邮件服务尚未配置（缺少 SMTP_HOST/SMTP_USER/SMTP_PASS 环境变量）'}), 400
+    body = request.get_json(silent=True) or {}
+    to = (body.get('email') or sess['email']).strip()
+    html = (f'<html><head><style>{_mail_style()}</style></head><body>'
+            f'<div class="title">✅ 邮件发送测试成功</div>'
+            f'<div class="sub">如果您收到这封邮件，说明看板的邮件通知功能已配置正确。</div>'
+            f'<div class="sub">发送时间：{datetime.now().strftime("%Y-%m-%d %H:%M")}</div></body></html>')
+    ok, err = send_mail([to], '【北斗看板】邮件通知测试', html)
+    add_log(sess['name'], '邮件测试', None, None, f'发送至{to}：{"成功" if ok else "失败:" + err}')
+    return jsonify({'ok': ok, 'msg': err, 'to': to})
 
 @app.route('/api/public_update/<int:row_id>', methods=['POST'])
 def api_public_update(row_id):

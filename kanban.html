@@ -449,6 +449,9 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <option value="新增权限">新增权限</option>
         <option value="删除权限">删除权限</option>
         <option value="导出备份">导出备份</option>
+        <option value="发送周报">发送周报</option>
+        <option value="发送DDL提醒">发送DDL提醒</option>
+        <option value="邮件测试">邮件测试</option>
         <option value="登录">登录</option>
       </select>
       <span id="log-count" style="font-size:12px;color:#888;margin-left:4px"></span>
@@ -481,6 +484,15 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
     </div>
     <div class="log-body" style="padding:0 18px 16px">
       <div id="perm-list"></div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #dde3f0">
+        <div style="font-size:13px;font-weight:700;color:#1a3a8f;margin-bottom:4px">📧 邮件通知</div>
+        <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:10px">每周五 17:30 自动发送周报；每天 17:00 自动给责任人发送 DDL 临期/逾期提醒（配置见部署说明）。也可在下方手动测试：</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="bsave" style="background:#1565c0;padding:7px 14px;font-size:12px" onclick="notifyTest()">📨 发送测试邮件</button>
+          <button class="bsave" style="background:#2e7d32;padding:7px 14px;font-size:12px" onclick="notifyRun('weekly')">立即发送周报</button>
+          <button class="bsave" style="background:#6a1b9a;padding:7px 14px;font-size:12px" onclick="notifyRun('reminders')">立即发送DDL提醒</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -989,7 +1001,7 @@ function renderLog() {
   var em = document.getElementById('log-empty');
   if (!rows.length) { tb.innerHTML=''; em.style.display=''; return; }
   em.style.display = 'none';
-  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','登录':'la-login'};
+  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','发送周报':'la-pub','发送DDL提醒':'la-pub','邮件测试':'la-pub','登录':'la-login'};
   tb.innerHTML = rows.map(function(r){
     return '<tr><td style="white-space:nowrap">'+r.time+'</td><td><strong>'+r.operator+'</strong></td>'+
       '<td><span class="'+(acls[r.action]||'la-edit')+'">'+r.action+'</span></td>'+
@@ -1045,6 +1057,26 @@ function delPerm(email) {
   fetch('/api/contacts/'+encodeURIComponent(email), {method:'DELETE', headers:{'X-Session':S.token}})
   .then(function(r){ return r.json(); })
   .then(function(d){ if (d.ok) { showT('已移除','ok'); loadPerm(); } else showT(d.msg || '移除失败','err'); })
+  .catch(function(){ showT('请求失败','err'); });
+}
+function notifyTest() {
+  showT('正在发送测试邮件...','ok');
+  fetch('/api/notify/test', {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify({})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if (d.ok) showT('测试邮件已发送到 '+d.to,'ok'); else showT(d.msg || '发送失败','err'); })
+  .catch(function(){ showT('请求失败','err'); });
+}
+function notifyRun(kind) {
+  var label = kind==='weekly' ? '周报' : 'DDL提醒';
+  if (!confirm('确认立即向相关人员发送「'+label+'」？')) return;
+  showT('正在发送'+label+'...','ok');
+  fetch('/api/notify/'+kind, {method:'POST', headers:{'X-Session':S.token}})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok && kind==='weekly') showT('周报已发送给 '+d.recipients+' 个邮箱','ok');
+    else if (d.ok) showT('提醒已发送：通知 '+d.notified_people+' 人，成功 '+d.sent+' 封','ok');
+    else showT(d.msg || '发送失败','err');
+  })
   .catch(function(){ showT('请求失败','err'); });
 }
 
