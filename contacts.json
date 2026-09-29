@@ -78,5 +78,10 @@
     "name": "wei.ma",
     "email": "wei.ma@livoxtech.com",
     "role": "admin"
+  },
+  {
+    "name": "kerwin.wang",
+    "email": "kerwin.wang@livoxtech.com",
+    "role": "person"
   }
 ]
