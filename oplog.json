@@ -214,5 +214,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "共导出19条事项"
+  },
+  {
+    "time": "2026-09-29 08:54:45",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 4,
+    "item_name": "世界机器人大会安排",
+    "detail": "进展:客户邀约进行中；产品尚未借到，备选方案租用宇树的G1。；状态→完成；Livox确认→完成；责任人→杨海月；优先级→中"
   }
 ]
