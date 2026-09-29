@@ -286,5 +286,13 @@
     "item_id": null,
     "item_name": "wei.ma",
     "detail": "邮箱:wei.ma@livoxtech.com；角色:管理员"
+  },
+  {
+    "time": "2026-09-29 11:32:59",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "kerwin.wang",
+    "detail": "邮箱:kerwin.wang@livoxtech.com；角色:责任人"
   }
 ]
