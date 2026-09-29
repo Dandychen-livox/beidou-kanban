@@ -278,5 +278,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "邮箱:wei.ma@livoxtech.com"
+  },
+  {
+    "time": "2026-09-29 11:31:43",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "wei.ma",
+    "detail": "邮箱:wei.ma@livoxtech.com；角色:管理员"
   }
 ]
