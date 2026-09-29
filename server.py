@@ -422,9 +422,12 @@ def _migrate_data():
                 row['recurring']  = False
                 row.setdefault('recur_note', '')
             changed = True
+        if 'initiator' not in row:
+            row['initiator'] = ''
+            changed = True
     if changed:
         write_data(rows)
-        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at/recurring 字段', flush=True)
+        print(f'[migrate] 已为 {len(rows)} 条事项补齐 priority/completed_at/status_done_at/recurring/initiator 字段', flush=True)
 
 _migrate_data()
 
@@ -741,6 +744,7 @@ def api_add():
             'item':         body.get('item', ''),
             'submit':       body.get('submit', ''),
             'ddl':          body.get('ddl', ''),
+            'initiator':    body.get('initiator', ''),
             'person':       body.get('person', ''),
             'livox':        body.get('livox', 'Dandy'),
             'priority':     norm_priority(body.get('priority', '中')),
@@ -880,12 +884,12 @@ def api_export():
     """一键备份：把当前全部事项导出为 Excel，供管理员下载存档"""
     if not is_admin(request): abort(403)
     rows = read_data()
-    headers = ['ID', '事项名称', '类型', '周期说明', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
+    headers = ['ID', '事项名称', '发起人', '类型', '周期说明', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
                '优先级', '进展', '提交物链接', '闭环状态', 'Livox确认', '完成时间(责任人标记)',
                '完成时间(双重确认)', '最近更新时间', '最近更新人', '创建日期']
-    widths = [6, 26, 12, 12, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
+    widths = [6, 26, 14, 12, 12, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
     data_rows = [[
-        r.get('id', ''), r.get('item', ''),
+        r.get('id', ''), r.get('item', ''), r.get('initiator', ''),
         '重复性待办' if r.get('recurring') else '待办事项',
         r.get('recur_note', ''), r.get('submit', ''), r.get('ddl', ''),
         r.get('person', ''), r.get('livox', ''), r.get('priority', '中'),
@@ -932,8 +936,8 @@ def api_template():
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = '事项明细'
-        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人', '优先级', '重复性待办', '周期说明', '进展', '提交物链接', '闭环状态']
-        notes   = ['必填', '提交要求', '如：2026-08-15（一次性事项截止日/重复性待办下次到期日）', '如：赵云飞', '如：Dandy', '高/中/低，留空默认中', '是/否，留空默认否', '如：每月31日，仅重复性待办填写', '进展说明', 'https://...', '未完成/完成/挂起']
+        headers = ['事项名称*', '提交内容/要求', 'DDL', '责任人', '发起人', 'LIVOX对接人', '优先级', '重复性待办', '周期说明', '进展', '提交物链接', '闭环状态']
+        notes   = ['必填', '提交要求', '如：2026-08-15（一次性事项截止日/重复性待办下次到期日）', '如：赵云飞', '任务发起人，如：Dandy', '如：Dandy', '高/中/低，留空默认中', '是/否，留空默认否', '如：每月31日，仅重复性待办填写', '进展说明', 'https://...', '未完成/完成/挂起']
         for i, (h, n) in enumerate(zip(headers, notes), 1):
             ws.cell(1, i, h)
             ws.cell(2, i, n)
@@ -986,6 +990,7 @@ def _parse_excel(stream):
         '提交内容/要求': 'submit', '提交内容': 'submit',
         'DDL': 'ddl', '截止日期': 'ddl',
         '责任人': 'person',
+        '发起人': 'initiator', '任务发起人': 'initiator',
         'LIVOX对接人': 'livox', 'Livox对接人': 'livox',
         '优先级': 'priority',
         '重复性待办': 'recurring', '是否重复': 'recurring',
@@ -1021,6 +1026,7 @@ def _do_batch(items):
                 'id': cur_id, 'date': datetime.now().strftime('%Y-%m-%d'),
                 'item': item.get('item', ''), 'submit': item.get('submit', ''),
                 'ddl':  item.get('ddl', ''),  'person': item.get('person', ''),
+                'initiator': item.get('initiator', ''),
                 'livox': item.get('livox', 'Dandy'), 'priority': norm_priority(item.get('priority', '中')),
                 'recurring': norm_bool(item.get('recurring', False)), 'recur_note': item.get('recur_note', ''),
                 'progress': item.get('progress', ''),

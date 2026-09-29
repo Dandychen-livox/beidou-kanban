@@ -286,6 +286,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
           <th style="min-width:200px">提交内容／要求</th>
           <th style="width:105px;text-align:center">DDL</th>
           <th style="width:95px;text-align:center">责任人</th>
+          <th style="width:88px;text-align:center">发起人</th>
           <th style="min-width:180px">进展</th>
           <th style="width:120px">提交物</th>
           <th style="width:86px;text-align:center">闭环状态</th>
@@ -310,6 +311,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
           <th style="min-width:180px">提交内容／要求</th>
           <th style="width:105px;text-align:center">DDL（下次到期）</th>
           <th style="width:95px;text-align:center">责任人</th>
+          <th style="width:88px;text-align:center">发起人</th>
           <th style="min-width:160px">进展</th>
           <th style="width:110px">提交物</th>
           <th style="width:86px;text-align:center">闭环状态</th>
@@ -332,8 +334,9 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <div class="fg"><label>事项名称 *</label><input id="ei" placeholder="事项名称"></div>
       <div class="frow">
         <div class="fg"><label>责任人</label><input id="ep" placeholder="如：赵云飞 或 赵云飞&李建萍"></div>
-        <div class="fg"><label>LIVOX对接人</label><input id="el" placeholder="如：Dandy"></div>
+        <div class="fg"><label>发起人</label><input id="eini" placeholder="如：Dandy"></div>
       </div>
+      <div class="fg"><label>LIVOX对接人</label><input id="el" placeholder="如：Dandy"></div>
       <div class="fg"><label>提交内容／要求</label><textarea id="es" rows="3"></textarea></div>
       <div class="frow">
         <div class="fg"><label>DDL（一次性事项截止日，重复性待办为下次到期日）</label><input id="ed" placeholder="如：2026-08-15"></div>
@@ -416,7 +419,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <div style="font-size:12px;color:#555;margin-bottom:6px">预览：共 <strong id="preview-count">0</strong> 条</div>
       <div class="preview-scroll">
         <table class="ptable">
-          <thead><tr><th>#</th><th>事项名称</th><th>DDL</th><th>责任人</th><th>优先级</th><th>状态</th></tr></thead>
+          <thead><tr><th>#</th><th>事项名称</th><th>DDL</th><th>责任人</th><th>发起人</th><th>优先级</th><th>状态</th></tr></thead>
           <tbody id="preview-tbody"></tbody>
         </table>
       </div>
@@ -758,6 +761,7 @@ function renderDetail() {
         '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
         '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
         '<td style="text-align:center">'+ph+'</td>'+
+        '<td style="text-align:center">'+(row.initiator||'<span style="color:#bbb;font-size:12px">—</span>')+'</td>'+
         '<td>'+progressCell+'</td>'+
         '<td>'+subUrl+'</td>'+
         '<td style="text-align:center">'+sh+'</td>'+
@@ -772,6 +776,7 @@ function renderDetail() {
         '<td><div class="stxt">'+linkify(row.submit)+'</div></td>'+
         '<td style="text-align:center">'+ddlTag(row.ddl, row.status)+'</td>'+
         '<td style="text-align:center">'+ph+'</td>'+
+        '<td style="text-align:center">'+(row.initiator||'<span style="color:#bbb;font-size:12px">—</span>')+'</td>'+
         '<td>'+progressCell+'</td>'+
         '<td>'+subUrl+'</td>'+
         '<td style="text-align:center">'+sh+'</td>'+
@@ -807,6 +812,7 @@ function openEdit(id) {
   if (adm) {
     document.getElementById('ei').value = row.item || '';
     document.getElementById('ep').value = row.person || '';
+    document.getElementById('eini').value = row.initiator || '';
     document.getElementById('el').value = row.livox  || '';
     document.getElementById('es').value = row.submit || '';
     document.getElementById('ed').value = row.ddl    || '';
@@ -826,7 +832,7 @@ function openAdd() {
   document.getElementById('mtitle').textContent = '＋ 新增事项';
   document.getElementById('aonly').style.display = '';
   document.getElementById('lc-field').style.display = '';
-  ['ei','ep','el','es','ed','eu','epg','ernote'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['ei','ep','el','es','ed','eu','epg','ernote','eini'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('est').value = '未完成';
   document.getElementById('elc').value = '未完成';
   document.getElementById('epr').value = '中';
@@ -842,6 +848,7 @@ function saveM() {
   if (adm) {
     Object.assign(body, {
       item: document.getElementById('ei').value, person: document.getElementById('ep').value,
+      initiator: document.getElementById('eini').value,
       livox: document.getElementById('el').value, submit: document.getElementById('es').value,
       ddl:  document.getElementById('ed').value, submit_url: document.getElementById('eu').value,
       livox_confirm: document.getElementById('elc').value,
@@ -954,7 +961,7 @@ function handleFile(file) {
 function showPreview(rows) {
   var tb = document.getElementById('preview-tbody');
   tb.innerHTML = rows.map(function(r,i){
-    return '<tr><td>'+(i+1)+'</td><td>'+r.item.substring(0,20)+'</td><td>'+(r.ddl||'—')+'</td><td>'+(r.person||'—')+'</td><td>'+(r.priority||'中')+'</td><td>'+(r.status||'未完成')+'</td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td>'+r.item.substring(0,20)+'</td><td>'+(r.ddl||'—')+'</td><td>'+(r.person||'—')+'</td><td>'+(r.initiator||'—')+'</td><td>'+(r.priority||'中')+'</td><td>'+(r.status||'未完成')+'</td></tr>';
   }).join('');
   document.getElementById('preview-count').textContent = rows.length;
   document.getElementById('batch-preview').style.display = rows.length>0 ? '' : 'none';
