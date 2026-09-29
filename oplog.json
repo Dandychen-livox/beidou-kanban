@@ -206,5 +206,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "jessica.li@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-09-29 08:43:22",
+    "operator": "Dandy.chen",
+    "action": "导出备份",
+    "item_id": null,
+    "item_name": null,
+    "detail": "共导出19条事项"
   }
 ]
