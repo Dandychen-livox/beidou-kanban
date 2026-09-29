@@ -254,5 +254,21 @@
     "item_id": null,
     "item_name": null,
     "detail": "jessica.li@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-09-29 11:31:22",
+    "operator": "Dandy.chen",
+    "action": "删除权限",
+    "item_id": null,
+    "item_name": null,
+    "detail": "邮箱:karson.chen@livoxtech.com"
+  },
+  {
+    "time": "2026-09-29 11:31:23",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "Karson.chen",
+    "detail": "邮箱:karson.chen@livoxtech.com；角色:管理员"
   }
 ]
