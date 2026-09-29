@@ -491,43 +491,149 @@ def api_delete(row_id):
     add_log(caller, '删除事项', row_id, item_name)
     return jsonify({'ok': True})
 
+def _xlsx_bytes_stdlib(headers, data_rows, widths, sheet_name='事项备份'):
+    """不依赖第三方库，直接用 Python 标准库生成 .xlsx 文件（Excel 2007+ 格式）。
+       这样即使服务器没装上 openpyxl，备份下载也能正常工作。"""
+    import zipfile
+    from xml.sax.saxutils import escape
+
+    def clean(v):
+        s = '' if v is None else str(v)
+        return ''.join(ch for ch in s if ch >= ' ' or ch in '\t\n\r')
+
+    def colref(n):
+        s = ''
+        while n > 0:
+            n, r = divmod(n - 1, 26)
+            s = chr(65 + r) + s
+        return s
+
+    def cell_xml(ref, val, style):
+        if isinstance(val, (int, float)) and not isinstance(val, bool):
+            return f'<c r="{ref}" s="{style}"><v>{val}</v></c>'
+        return (f'<c r="{ref}" t="inlineStr" s="{style}">'
+                f'<is><t xml:space="preserve">{escape(clean(val))}</t></is></c>')
+
+    rows_xml = []
+    head_cells = ''.join(cell_xml(f'{colref(i+1)}1', h, 1) for i, h in enumerate(headers))
+    rows_xml.append(f'<row r="1">{head_cells}</row>')
+    for ri, row in enumerate(data_rows, start=2):
+        cells = ''.join(cell_xml(f'{colref(ci+1)}{ri}', v, 2) for ci, v in enumerate(row))
+        rows_xml.append(f'<row r="{ri}">{cells}</row>')
+    cols_xml = ''.join(
+        f'<col min="{i+1}" max="{i+1}" width="{w}" customWidth="1"/>'
+        for i, w in enumerate(widths)
+    )
+    sheet_xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        f'<cols>{cols_xml}</cols>'
+        f'<sheetData>{"".join(rows_xml)}</sheetData>'
+        '</worksheet>'
+    )
+    content_types = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        '<Default Extension="xml" ContentType="application/xml"/>'
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+        '</Types>'
+    )
+    root_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+        '</Relationships>'
+    )
+    workbook = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+        f'<sheets><sheet name="{escape(sheet_name)}" sheetId="1" r:id="rId1"/></sheets>'
+        '</workbook>'
+    )
+    wb_rels = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+        '</Relationships>'
+    )
+    styles = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        '<fonts count="2">'
+        '<font><sz val="11"/><name val="Calibri"/></font>'
+        '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
+        '</fonts>'
+        '<fills count="2">'
+        '<fill><patternFill patternType="none"/></fill>'
+        '<fill><patternFill patternType="solid"><fgColor rgb="FF1A3A8F"/><bgColor indexed="64"/></patternFill></fill>'
+        '</fills>'
+        '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        '<cellXfs count="3">'
+        '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+        '<xf numFmtId="0" fontId="1" fillId="1" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+        '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>'
+        '</cellXfs>'
+        '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
+        '</styleSheet>'
+    )
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.writestr('[Content_Types].xml', content_types)
+        z.writestr('_rels/.rels', root_rels)
+        z.writestr('xl/workbook.xml', workbook)
+        z.writestr('xl/_rels/workbook.xml.rels', wb_rels)
+        z.writestr('xl/styles.xml', styles)
+        z.writestr('xl/worksheets/sheet1.xml', sheet_xml)
+    return buf.getvalue()
+
 @app.route('/api/export')
 def api_export():
     """一键备份：把当前全部事项导出为 Excel，供管理员下载存档"""
     if not is_admin(request): abort(403)
-    import openpyxl
-    from openpyxl.styles import Font, PatternFill
     rows = read_data()
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = '事项备份'
     headers = ['ID', '事项名称', '类型', '周期说明', '提交内容/要求', 'DDL', '责任人', 'LIVOX对接人',
                '优先级', '进展', '提交物链接', '闭环状态', 'Livox确认', '完成时间(责任人标记)',
                '完成时间(双重确认)', '最近更新时间', '最近更新人', '创建日期']
-    ws.append(headers)
-    for c in ws[1]:
-        c.font = Font(bold=True, color='FFFFFF')
-        c.fill = PatternFill('solid', fgColor='1A3A8F')
-    for r in rows:
-        ws.append([
-            r.get('id', ''), r.get('item', ''),
-            '重复性待办' if r.get('recurring') else '待办事项',
-            r.get('recur_note', ''), r.get('submit', ''), r.get('ddl', ''),
-            r.get('person', ''), r.get('livox', ''), r.get('priority', '中'),
-            r.get('progress', ''), r.get('submit_url', ''), r.get('status', ''),
-            r.get('livox_confirm', ''), r.get('status_done_at', ''),
-            r.get('completed_at', ''), r.get('updated_at', ''), r.get('updated_by', ''),
-            r.get('date', ''),
-        ])
     widths = [6, 26, 12, 12, 30, 12, 14, 12, 8, 30, 26, 10, 10, 16, 16, 16, 12, 12]
-    for i, w in enumerate(widths, 1):
-        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
+    data_rows = [[
+        r.get('id', ''), r.get('item', ''),
+        '重复性待办' if r.get('recurring') else '待办事项',
+        r.get('recur_note', ''), r.get('submit', ''), r.get('ddl', ''),
+        r.get('person', ''), r.get('livox', ''), r.get('priority', '中'),
+        r.get('progress', ''), r.get('submit_url', ''), r.get('status', ''),
+        r.get('livox_confirm', ''), r.get('status_done_at', ''),
+        r.get('completed_at', ''), r.get('updated_at', ''), r.get('updated_by', ''),
+        r.get('date', ''),
+    ] for r in rows]
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = '事项备份'
+        ws.append(headers)
+        for c in ws[1]:
+            c.font = Font(bold=True, color='FFFFFF')
+            c.fill = PatternFill('solid', fgColor='1A3A8F')
+        for dr in data_rows:
+            ws.append(dr)
+        for i, w in enumerate(widths, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+        buf = io.BytesIO()
+        wb.save(buf)
+        data = buf.getvalue()
+    except Exception:
+        # 未安装 openpyxl 时，用标准库兜底生成 Excel，保证备份功能始终可用
+        data = _xlsx_bytes_stdlib(headers, data_rows, widths)
     ts = datetime.now().strftime('%Y%m%d_%H%M')
     add_log(get_caller(request), '导出备份', None, None, f'共导出{len(rows)}条事项')
-    return Response(buf.read(),
+    return Response(data,
                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     headers={'Content-Disposition': f'attachment;filename=beidou-kanban-backup-{ts}.xlsx'})
 
