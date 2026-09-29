@@ -109,7 +109,9 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": true,
-    "recur_note": "每月更新"
+    "recur_note": "每周更新",
+    "updated_at": "2026-09-29 09:28",
+    "updated_by": "Dandy.chen"
   },
   {
     "id": 7,
