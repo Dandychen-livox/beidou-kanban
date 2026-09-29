@@ -64,13 +64,14 @@
     "progress": "客户邀约进行中；产品尚未借到，备选方案租用宇树的G1。",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "未完成",
-    "updated_at": "2026-09-18 10:05",
+    "livox_confirm": "完成",
+    "updated_at": "2026-09-29 08:54",
     "updated_by": "Dandy.chen",
     "priority": "中",
     "status_done_at": "2026-09-18 10:05",
     "recurring": false,
-    "recur_note": ""
+    "recur_note": "",
+    "completed_at": "2026-09-29 08:54"
   },
   {
     "id": 5,
