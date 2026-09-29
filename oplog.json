@@ -246,5 +246,13 @@
     "item_id": 6,
     "item_name": "竞品信息收集",
     "detail": "进展:7月20日已经完成表3竞品公司信息表\n后续每周更新；状态→完成；Livox确认→完成；责任人→杨朔&李建萍；优先级→中"
+  },
+  {
+    "time": "2026-09-29 11:23:20",
+    "operator": "Jessica.li",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "jessica.li@livoxtech.com（管理员）"
   }
 ]
