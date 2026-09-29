@@ -5,7 +5,7 @@
     "item": "Avia2+Mid360L用户声音反馈",
     "submit": "在线文档：https://www.kdocs.cn/l/chcPb0L1SJnl\n收集方式：第一次反馈7月2日\n后续在线填写，每个月31日，发邮件反馈\n收件人：dandy\n抄送：周培云/jesscia/wei.ma",
     "ddl": "",
-    "person": "",
+    "person": "赵云飞",
     "livox": "Dandy",
     "progress": "初次已经提交",
     "submit_url": "https://www.kdocs.cn/l/chcPb0L1SJnl",
@@ -15,7 +15,9 @@
     "completed_at": "2026-09-28 07:32",
     "status_done_at": "2026-09-28 07:48",
     "recurring": true,
-    "recur_note": "每月更新"
+    "recur_note": "每月更新",
+    "updated_at": "2026-09-29 11:35",
+    "updated_by": "Dandy.chen"
   },
   {
     "id": 2,
