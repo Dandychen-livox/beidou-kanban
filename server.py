@@ -27,12 +27,15 @@ FALLBACK_ADMIN_EMAILS = set(
 )
 
 # ── 邮件通知配置（全部通过 Render 环境变量注入，不写入代码/仓库） ──
+# 首选：第三方邮件服务 SendGrid（HTTP API，无需公司邮箱 SMTP）
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+# 兼容：如果另行配置了 SMTP，也可继续用 SMTP 发送（SendGrid 未配置时启用）
 SMTP_HOST      = os.environ.get('SMTP_HOST', '')
 SMTP_PORT      = int(os.environ.get('SMTP_PORT', '465') or '465')
 SMTP_USER      = os.environ.get('SMTP_USER', '')
 SMTP_PASS      = os.environ.get('SMTP_PASS', '')
 SMTP_SSL       = os.environ.get('SMTP_SSL', '1') == '1'   # 1=SSL(465)，0=STARTTLS(587)
-MAIL_FROM      = os.environ.get('MAIL_FROM', '') or SMTP_USER
+MAIL_FROM      = os.environ.get('MAIL_FROM', '') or SMTP_USER   # SendGrid 下必须是已通过验证的发件邮箱
 MAIL_FROM_NAME = os.environ.get('MAIL_FROM_NAME', '北斗代理事项闭环看板')
 SITE_URL       = os.environ.get('SITE_URL', 'https://beidou-kanban.onrender.com')
 CRON_SECRET    = os.environ.get('CRON_SECRET', '')        # 定时任务调用密钥
@@ -197,15 +200,44 @@ def require_session(req):
 
 # ── 邮件发送 ──
 def mail_configured():
-    return bool(SMTP_HOST and SMTP_USER and SMTP_PASS)
+    return bool(SENDGRID_API_KEY or (SMTP_HOST and SMTP_USER and SMTP_PASS))
 
-def send_mail(to_list, subject, html, bcc=False):
-    """发送一封 HTML 邮件。to_list 为收件邮箱列表；bcc=True 时收件人互相不可见。"""
-    to_list = [e for e in dict.fromkeys([ (t or '').strip() for t in (to_list or []) ]) if e]
-    if not to_list:
-        return False, '没有收件人'
-    if not mail_configured():
-        return False, 'SMTP 未配置'
+def _send_via_sendgrid(to_list, subject, html, bcc):
+    """通过 SendGrid v3 API 发送（HTTP，不依赖 SMTP）"""
+    import urllib.request, urllib.error
+    sender = (MAIL_FROM or '').strip()
+    if not sender:
+        return False, '未配置发件邮箱 MAIL_FROM（需为 SendGrid 已验证的发件地址）'
+    if bcc:
+        bcc_list = [e for e in to_list if e.lower() != sender.lower()]
+        personalization = {'to': [{'email': sender}]}
+        if bcc_list:
+            personalization['bcc'] = [{'email': e} for e in bcc_list]
+    else:
+        personalization = {'to': [{'email': e} for e in to_list]}
+    payload = {
+        'personalizations': [personalization],
+        'from': {'email': sender, 'name': MAIL_FROM_NAME},
+        'subject': subject,
+        'content': [{'type': 'text/html', 'value': html}],
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request('https://api.sendgrid.com/v3/mail/send', data=data, method='POST')
+    req.add_header('Authorization', f'Bearer {SENDGRID_API_KEY}')
+    req.add_header('Content-Type', 'application/json')
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            status = r.status
+        return (200 <= status < 300), ''
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8', 'ignore')[:300]
+        print(f'[sendgrid] 发送失败 HTTP {e.code}: {body}', flush=True)
+        return False, f'HTTP {e.code}: {body}'
+    except Exception as e:
+        print(f'[sendgrid] 发送失败：{e}', flush=True)
+        return False, str(e)
+
+def _send_via_smtp(to_list, subject, html, bcc):
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from email.header import Header
@@ -213,26 +245,32 @@ def send_mail(to_list, subject, html, bcc=False):
     msg = MIMEMultipart('alternative')
     msg['Subject'] = Header(subject, 'utf-8')
     msg['From'] = formataddr((str(Header(MAIL_FROM_NAME, 'utf-8')), MAIL_FROM))
-    if bcc:
-        msg['To'] = MAIL_FROM
-    else:
-        msg['To'] = ', '.join(to_list)
+    msg['To'] = MAIL_FROM if bcc else ', '.join(to_list)
     msg.attach(MIMEText(html, 'html', 'utf-8'))
     try:
         if SMTP_SSL:
             srv = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=25)
         else:
             srv = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=25)
-            srv.ehlo()
-            srv.starttls()
-            srv.ehlo()
+            srv.ehlo(); srv.starttls(); srv.ehlo()
         srv.login(SMTP_USER, SMTP_PASS)
         srv.sendmail(MAIL_FROM, to_list, msg.as_string())
         srv.quit()
         return True, ''
     except Exception as e:
-        print(f'[mail] 发送失败：{e}', flush=True)
+        print(f'[smtp] 发送失败：{e}', flush=True)
         return False, str(e)
+
+def send_mail(to_list, subject, html, bcc=False):
+    """发送一封 HTML 邮件。优先用 SendGrid，未配置则回退 SMTP。"""
+    to_list = [e for e in dict.fromkeys([ (t or '').strip() for t in (to_list or []) ]) if e]
+    if not to_list:
+        return False, '没有收件人'
+    if SENDGRID_API_KEY:
+        return _send_via_sendgrid(to_list, subject, html, bcc)
+    if SMTP_HOST and SMTP_USER and SMTP_PASS:
+        return _send_via_smtp(to_list, subject, html, bcc)
+    return False, '邮件服务未配置（缺少 SENDGRID_API_KEY 或 SMTP 配置）'
 
 def email_for_person(name):
     """把事项里的责任人姓名，映射到通讯录里的邮箱"""
@@ -662,7 +700,7 @@ def api_notify_test():
     sess = require_session(request)
     if sess['role'] != 'admin': abort(403)
     if not mail_configured():
-        return jsonify({'ok': False, 'msg': '邮件服务尚未配置（缺少 SMTP_HOST/SMTP_USER/SMTP_PASS 环境变量）'}), 400
+        return jsonify({'ok': False, 'msg': '邮件服务尚未配置（缺少 SENDGRID_API_KEY，或 SMTP 配置）'}), 400
     body = request.get_json(silent=True) or {}
     to = (body.get('email') or sess['email']).strip()
     html = (f'<html><head><style>{_mail_style()}</style></head><body>'
