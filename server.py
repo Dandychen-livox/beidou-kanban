@@ -695,6 +695,23 @@ def api_notify_reminders():
     return jsonify({'ok': True, 'notified_people': len(grouped), 'sent': sent,
                     'skipped_no_email': skipped, 'failed': failed})
 
+@app.route('/api/notify/status')
+def api_notify_status():
+    """诊断用：查看服务器实际读到的邮件配置（不泄露完整密钥）"""
+    sess = require_session(request)
+    if sess['role'] != 'admin': abort(403)
+    key = SENDGRID_API_KEY or ''
+    return jsonify({
+        'sendgrid_configured': bool(key),
+        'sendgrid_key_hint': (key[:3] + '***' + key[-4:]) if len(key) > 8 else ('***' if key else ''),
+        'mail_from': MAIL_FROM,
+        'mail_from_name': MAIL_FROM_NAME,
+        'smtp_configured': bool(SMTP_HOST and SMTP_USER and SMTP_PASS),
+        'cron_secret_set': bool(CRON_SECRET),
+        'site_url': SITE_URL,
+        'mail_ready': mail_configured(),
+    })
+
 @app.route('/api/notify/test', methods=['POST'])
 def api_notify_test():
     sess = require_session(request)
