@@ -37,6 +37,7 @@ SMTP_PASS      = os.environ.get('SMTP_PASS', '')
 SMTP_SSL       = os.environ.get('SMTP_SSL', '1') == '1'   # 1=SSL(465)，0=STARTTLS(587)
 MAIL_FROM      = os.environ.get('MAIL_FROM', '') or SMTP_USER   # SendGrid 下必须是已通过验证的发件邮箱
 MAIL_FROM_NAME = os.environ.get('MAIL_FROM_NAME', '北斗代理事项闭环看板')
+REPLY_TO       = os.environ.get('REPLY_TO', '')   # 可选：收件人回复时回到的真实邮箱
 SITE_URL       = os.environ.get('SITE_URL', 'https://beidou-kanban.onrender.com')
 CRON_SECRET    = os.environ.get('CRON_SECRET', '')        # 定时任务调用密钥
 
@@ -221,6 +222,8 @@ def _send_via_sendgrid(to_list, subject, html, bcc):
         'subject': subject,
         'content': [{'type': 'text/html', 'value': html}],
     }
+    if REPLY_TO:
+        payload['reply_to'] = {'email': REPLY_TO}
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request('https://api.sendgrid.com/v3/mail/send', data=data, method='POST')
     req.add_header('Authorization', f'Bearer {SENDGRID_API_KEY}')
@@ -245,6 +248,8 @@ def _send_via_smtp(to_list, subject, html, bcc):
     msg = MIMEMultipart('alternative')
     msg['Subject'] = Header(subject, 'utf-8')
     msg['From'] = formataddr((str(Header(MAIL_FROM_NAME, 'utf-8')), MAIL_FROM))
+    if REPLY_TO:
+        msg['Reply-To'] = REPLY_TO
     msg['To'] = MAIL_FROM if bcc else ', '.join(to_list)
     msg.attach(MIMEText(html, 'html', 'utf-8'))
     try:
@@ -722,6 +727,7 @@ def api_notify_status():
         'sendgrid_key_hint': (key[:3] + '***' + key[-4:]) if len(key) > 8 else ('***' if key else ''),
         'mail_from': MAIL_FROM,
         'mail_from_name': MAIL_FROM_NAME,
+        'reply_to': REPLY_TO,
         'smtp_configured': bool(SMTP_HOST and SMTP_USER and SMTP_PASS),
         'cron_secret_set': bool(CRON_SECRET),
         'site_url': SITE_URL,
