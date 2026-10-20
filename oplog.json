@@ -318,5 +318,13 @@
     "item_id": 1,
     "item_name": "Avia2+Mid360L用户声音反馈",
     "detail": "进展:初次已经提交；状态→完成；Livox确认→完成；责任人→赵云飞；优先级→中"
+  },
+  {
+    "time": "2026-10-20 11:18:56",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
   }
 ]
