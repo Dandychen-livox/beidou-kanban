@@ -326,5 +326,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-20 11:30:01",
+    "operator": "Dandy.chen",
+    "action": "邮件测试",
+    "item_id": null,
+    "item_name": null,
+    "detail": "发送至xiaodanchen@livoxtech.com：成功"
   }
 ]
