@@ -660,14 +660,30 @@ def build_reminder_html(name, items):
 @app.route('/api/notify/weekly', methods=['POST', 'GET'])
 def api_notify_weekly():
     if not _cron_ok(request): abort(403)
+    body = request.get_json(silent=True) or {}
+    to_override = body.get('to')
+    if isinstance(to_override, str):
+        to_override = [x for x in re.split(r'[;,\s]+', to_override) if x]
+    to_override = [str(e).strip() for e in (to_override or []) if '@' in str(e)]
     rows = read_data()
-    recipients = all_contact_emails()
+    if to_override:
+        # 测试发送：只发给指定邮箱
+        recipients = list(dict.fromkeys(to_override))
+        is_test = True
+    else:
+        recipients = all_contact_emails()
+        is_test = False
     if not recipients:
-        return jsonify({'ok': False, 'msg': '通讯录中没有邮箱'}), 400
-    subject = f'【北斗看板】本周待办完成情况（{datetime.now().strftime("%Y-%m-%d")}）'
+        return jsonify({'ok': False, 'msg': '没有可用的收件邮箱'}), 400
+    prefix = '【测试】' if is_test else ''
+    subject = prefix + f'【北斗看板】本周待办完成情况（{datetime.now().strftime("%Y-%m-%d")}）'
     ok, err = send_mail(recipients, subject, build_weekly_html(rows), bcc=True)
-    add_log('系统', '发送周报', None, None, f'收件{len(recipients)}人；{"成功" if ok else "失败:" + err}')
-    return jsonify({'ok': ok, 'recipients': len(recipients), 'msg': err})
+    sess = verify_session(request.headers.get('X-Session', ''))
+    operator = sess['name'] if sess else '系统'
+    add_log(operator, '测试发送周报' if is_test else '发送周报', None, None,
+            f'收件{len(recipients)}人：{",".join(recipients)}；{"成功" if ok else "失败:" + err}')
+    return jsonify({'ok': ok, 'recipients': len(recipients), 'test': is_test,
+                    'msg': err, 'to': recipients})
 
 @app.route('/api/notify/reminders', methods=['POST', 'GET'])
 def api_notify_reminders():

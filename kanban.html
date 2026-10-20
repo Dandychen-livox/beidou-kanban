@@ -472,6 +472,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <option value="删除权限">删除权限</option>
         <option value="导出备份">导出备份</option>
         <option value="发送周报">发送周报</option>
+        <option value="测试发送周报">测试发送周报</option>
         <option value="发送DDL提醒">发送DDL提醒</option>
         <option value="邮件测试">邮件测试</option>
         <option value="登录">登录</option>
@@ -511,10 +512,39 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:10px">每周五 17:30 自动发送周报；每天 17:00 自动给责任人发送 DDL 临期/逾期提醒（配置见部署说明）。也可在下方手动测试：</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="bsave" style="background:#1565c0;padding:7px 14px;font-size:12px" onclick="notifyTest()">📨 发送测试邮件</button>
-          <button class="bsave" style="background:#2e7d32;padding:7px 14px;font-size:12px" onclick="notifyRun('weekly')">立即发送周报</button>
+          <button class="bsave" style="background:#00838f;padding:7px 14px;font-size:12px" onclick="openWeeklyTest()">🧪 测试发送周报（选收件人）</button>
+          <button class="bsave" style="background:#2e7d32;padding:7px 14px;font-size:12px" onclick="notifyRun('weekly')">立即发送周报（全部）</button>
           <button class="bsave" style="background:#6a1b9a;padding:7px 14px;font-size:12px" onclick="notifyRun('reminders')">立即发送DDL提醒</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 测试发送周报：选择收件人 -->
+<div class="log-modal" id="weekly-test-modal">
+  <div class="log-box" style="width:560px">
+    <div class="log-hdr">
+      <span>🧪 测试发送周报</span>
+      <button class="log-close" onclick="closeWeeklyTest()">✕</button>
+    </div>
+    <div style="padding:14px 18px 6px">
+      <div style="background:#e0f7fa;border-left:4px solid #00838f;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#006064;margin-bottom:14px">
+        测试发送只会发给下方勾选/填写的邮箱，不会打扰所有人。邮件标题会带【测试】字样。
+      </div>
+      <div class="fg">
+        <label>从授权名单中选择收件人</label>
+        <div id="weekly-test-list" style="max-height:180px;overflow-y:auto;border:1px solid #e0e4f0;border-radius:8px;padding:8px 10px"></div>
+      </div>
+      <div class="fg">
+        <label>额外收件邮箱（可选，多个用逗号分隔）</label>
+        <input id="weekly-test-extra" placeholder="如：someone@company.com, another@company.com" oninput="updateWeeklyTestCount()">
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:4px">已选择：<b id="weekly-test-count" style="color:#00838f">0</b> 个邮箱</div>
+    </div>
+    <div class="mfoot" style="padding:0 18px 18px">
+      <button class="bcancel" onclick="closeWeeklyTest()">取消</button>
+      <button class="bsave" style="background:#00838f" onclick="sendWeeklyTest()">发送测试周报</button>
     </div>
   </div>
 </div>
@@ -1135,7 +1165,7 @@ function renderLog() {
   var em = document.getElementById('log-empty');
   if (!rows.length) { tb.innerHTML=''; em.style.display=''; return; }
   em.style.display = 'none';
-  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','发送周报':'la-pub','发送DDL提醒':'la-pub','邮件测试':'la-pub','登录':'la-login'};
+  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','发送周报':'la-pub','测试发送周报':'la-pub','发送DDL提醒':'la-pub','邮件测试':'la-pub','登录':'la-login'};
   tb.innerHTML = rows.map(function(r){
     return '<tr><td style="white-space:nowrap">'+r.time+'</td><td><strong>'+r.operator+'</strong></td>'+
       '<td><span class="'+(acls[r.action]||'la-edit')+'">'+r.action+'</span></td>'+
@@ -1202,13 +1232,65 @@ function notifyTest() {
 }
 function notifyRun(kind) {
   var label = kind==='weekly' ? '周报' : 'DDL提醒';
-  if (!confirm('确认立即向相关人员发送「'+label+'」？')) return;
+  var scope = kind==='weekly' ? '全部授权邮箱' : '相关责任人';
+  if (!confirm('确认立即向「'+scope+'」发送'+label+'？')) return;
   showT('正在发送'+label+'...','ok');
   fetch('/api/notify/'+kind, {method:'POST', headers:{'X-Session':S.token}})
   .then(function(r){ return r.json(); })
   .then(function(d){
     if (d.ok && kind==='weekly') showT('周报已发送给 '+d.recipients+' 个邮箱','ok');
     else if (d.ok) showT('提醒已发送：通知 '+d.notified_people+' 人，成功 '+d.sent+' 封','ok');
+    else showT(d.msg || '发送失败','err');
+  })
+  .catch(function(){ showT('请求失败','err'); });
+}
+
+/* ─── 测试发送周报（选收件人） ─── */
+function openWeeklyTest() {
+  var list = document.getElementById('weekly-test-list');
+  list.innerHTML = '<div style="color:#bbb;font-size:12px;padding:6px">加载中...</div>';
+  document.getElementById('weekly-test-extra').value = '';
+  document.getElementById('weekly-test-modal').className = 'log-modal show';
+  fetch('/api/contacts', {headers:{'X-Session':S.token}})
+  .then(function(r){ return r.json(); })
+  .then(function(arr){
+    if (!arr.length) { list.innerHTML = '<div style="color:#bbb;font-size:12px;padding:6px">授权名单为空</div>'; return; }
+    list.innerHTML = arr.map(function(c){
+      var checked = (c.email||'').toLowerCase() === (S.email||'').toLowerCase() ? ' checked' : '';
+      return '<label style="display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:13px;cursor:pointer">'+
+        '<input type="checkbox" class="wk" value="'+c.email+'"'+checked+' onchange="updateWeeklyTestCount()">'+
+        '<span style="font-weight:600;min-width:80px">'+c.name+'</span>'+
+        '<span style="color:#666">'+c.email+'</span></label>';
+    }).join('');
+    updateWeeklyTestCount();
+  })
+  .catch(function(){ list.innerHTML = '<div style="color:#c62828;font-size:12px;padding:6px">加载失败</div>'; });
+}
+function closeWeeklyTest() { document.getElementById('weekly-test-modal').className = 'log-modal'; }
+function collectWeeklyTestEmails() {
+  var emails = [];
+  document.querySelectorAll('#weekly-test-list input.wk:checked').forEach(function(el){ emails.push(el.value.trim()); });
+  var extra = document.getElementById('weekly-test-extra').value || '';
+  extra.split(/[;,\s]+/).forEach(function(e){ e = e.trim(); if (e && e.indexOf('@') > 0) emails.push(e); });
+  var seen = {}, out = [];
+  emails.forEach(function(e){ var k = e.toLowerCase(); if (!seen[k]) { seen[k] = 1; out.push(e); } });
+  return out;
+}
+function updateWeeklyTestCount() {
+  document.getElementById('weekly-test-count').textContent = collectWeeklyTestEmails().length;
+}
+function sendWeeklyTest() {
+  var to = collectWeeklyTestEmails();
+  if (!to.length) { showT('请至少选择一个或填写一个收件邮箱','err'); return; }
+  showT('正在发送测试周报...','ok');
+  fetch('/api/notify/weekly', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Session':S.token},
+    body: JSON.stringify({to: to})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) { closeWeeklyTest(); showT('测试周报已发送给 '+d.recipients+' 个邮箱','ok'); }
     else showT(d.msg || '发送失败','err');
   })
   .catch(function(){ showT('请求失败','err'); });
@@ -1240,6 +1322,7 @@ document.getElementById('pub-modal').onclick= function(e){ if(e.target===this) c
 document.getElementById('batch-modal').onclick=function(e){ if(e.target===this) closeBatch(); };
 document.getElementById('log-modal').onclick= function(e){ if(e.target===this) closeLog(); };
 document.getElementById('perm-modal').onclick=function(e){ if(e.target===this) closePerm(); };
+document.getElementById('weekly-test-modal').onclick=function(e){ if(e.target===this) closeWeeklyTest(); };
 (function(){
   var btn = document.getElementById('btn-toggle-old');
   btn.textContent = S.showAllDone ? '⚙ 隐藏旧的已完成事项' : '⚙ 显示全部已完成';
