@@ -334,5 +334,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "发送至xiaodanchen@livoxtech.com：成功"
+  },
+  {
+    "time": "2026-10-20 11:37:52",
+    "operator": "Dandy.chen",
+    "action": "测试发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件1人：xiaodanchen@livoxtech.com；成功"
   }
 ]
