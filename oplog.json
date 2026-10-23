@@ -550,5 +550,13 @@
     "item_id": null,
     "item_name": "李建萍",
     "detail": "邮箱:lijp@ronwelltech.com；角色→录入员"
+  },
+  {
+    "time": "2026-10-23 14:09:13",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
   }
 ]
