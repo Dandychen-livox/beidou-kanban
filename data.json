@@ -423,5 +423,28 @@
     "initiator": "",
     "recur_type": "",
     "recur_value": ""
+  },
+  {
+    "id": 20,
+    "date": "2026-10-23",
+    "item": "Mid-360L客户分级调研",
+    "submit": "1.Mid-360L 客户分级调研表更新",
+    "ddl": "2026-10-30",
+    "initiator": "Dandy",
+    "person": "杨朔",
+    "livox": "Dandy",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "updated_at": "2026-10-23 00:27",
+    "updated_by": "Dandy.chen"
   }
 ]
