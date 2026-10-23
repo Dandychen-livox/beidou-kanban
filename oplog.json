@@ -510,5 +510,13 @@
     "item_id": null,
     "item_name": "xuhui.liu",
     "detail": "邮箱:xuhui.liu@livoxtech.com；角色:责任人"
+  },
+  {
+    "time": "2026-10-23 06:58:45",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com"
   }
 ]
