@@ -422,5 +422,13 @@
     "item_id": 21,
     "item_name": "TOP25客户调研",
     "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→肖玉虎；优先级→高"
+  },
+  {
+    "time": "2026-10-23 00:32:40",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 24,
+    "item_name": "手持测绘行业洞察",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
   }
 ]
