@@ -1,0 +1,38 @@
+name: Kanban Email Notifications
+
+on:
+  schedule:
+    - cron: '30 9 * * 5'   # 每周五 17:30 北京时间
+    - cron: '0 9 * * *'    # 每天 17:00 北京时间
+  workflow_dispatch:
+    inputs:
+      job:
+        description: '要执行的任务'
+        required: true
+        default: reminders
+        type: choice
+        options:
+          - reminders
+          - weekly
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      KANBAN_URL: https://beidou-kanban.onrender.com
+    steps:
+      - name: 每周汇总邮件
+        if: github.event.schedule == '30 9 * * 5'
+        run: |
+          curl -fsS -X POST "$KANBAN_URL/api/notify/weekly" \
+            -H "X-Cron-Secret: ${{ secrets.KANBAN_CRON_SECRET }}" --max-time 180
+      - name: 每日DDL提醒
+        if: github.event.schedule == '0 9 * * *'
+        run: |
+          curl -fsS -X POST "$KANBAN_URL/api/notify/reminders" \
+            -H "X-Cron-Secret: ${{ secrets.KANBAN_CRON_SECRET }}" --max-time 180
+      - name: 手动触发
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          curl -fsS -X POST "$KANBAN_URL/api/notify/${{ github.event.inputs.job }}" \
+            -H "X-Cron-Secret: ${{ secrets.KANBAN_CRON_SECRET }}" --max-time 180

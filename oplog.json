@@ -366,5 +366,181 @@
     "item_id": null,
     "item_name": null,
     "detail": "收件1人：2279528710@qq.com；成功"
+  },
+  {
+    "time": "2026-10-20 12:11:14",
+    "operator": "Dandy.chen",
+    "action": "测试发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件1人：xiaodanchen@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-10-23 00:27:04",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:28:10",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 21,
+    "item_name": "TOP25客户调研",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:29:56",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 22,
+    "item_name": "26年总结以及27年计划",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:30:56",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 23,
+    "item_name": "27年BP制定全量客户预测",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:32:05",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 24,
+    "item_name": "手持测绘行业洞察",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:32:22",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 21,
+    "item_name": "TOP25客户调研",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→肖玉虎；优先级→高"
+  },
+  {
+    "time": "2026-10-23 00:32:40",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 24,
+    "item_name": "手持测绘行业洞察",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-10-23 00:34:17",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 25,
+    "item_name": "上海华翔冲突复核发起确认",
+    "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:39:58",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 02:07:46",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 02:30:49",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 02:37:33",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-23 04:27:01",
+    "operator": "wei.ma",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "wei.ma@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 04:28:20",
+    "operator": "Karson.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "karson.chen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 06:03:36",
+    "operator": "kerwin.wang",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "kerwin.wang@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 06:19:55",
+    "operator": "Nathan.song",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "songzhiyu@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 06:58:16",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "xuhui.liu",
+    "detail": "邮箱:xuhui.liu@livoxtech.com；角色:责任人"
+  },
+  {
+    "time": "2026-10-23 06:58:45",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com"
+  },
+  {
+    "time": "2026-10-23 06:59:19",
+    "operator": "xuhui.liu",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xuhui.liu@livoxtech.com"
+  },
+  {
+    "time": "2026-10-23 07:28:15",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 07:29:32",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "Sophie.hu",
+    "detail": "邮箱:sophie.h@livoxtech.com；角色:责任人"
   }
 ]
