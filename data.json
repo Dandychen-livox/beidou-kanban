@@ -469,5 +469,28 @@
     "status_done_at": "",
     "updated_at": "2026-10-23 00:28",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 22,
+    "date": "2026-10-23",
+    "item": "26年总结以及27年计划",
+    "submit": "1.26年总结以及27年计划，具体参考框架",
+    "ddl": "2026-11-03",
+    "initiator": "Dandy",
+    "person": "周培云",
+    "livox": "",
+    "priority": "高",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "updated_at": "2026-10-23 00:29",
+    "updated_by": "Dandy.chen"
   }
 ]
