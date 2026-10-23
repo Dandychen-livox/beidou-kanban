@@ -30,6 +30,7 @@ body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#dce3ef;c
 .hdr-title{color:#fff;font-size:16px;font-weight:700}
 .badge{padding:2px 11px;border-radius:20px;font-size:12px;font-weight:700}
 .b-admin{background:#ffd54f;color:#3e2700}
+.b-editor{background:#80deea;color:#004d40}
 .b-person{background:#a5d6a7;color:#1b5e20}
 .b-guest{background:#546e7a;color:#fff}
 .hdr-r{margin-left:auto;display:flex;align-items:center;gap:10px}
@@ -470,6 +471,7 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
         <option value="批量导入">批量导入</option>
         <option value="新增权限">新增权限</option>
         <option value="删除权限">删除权限</option>
+        <option value="修改权限">修改权限</option>
         <option value="导出备份">导出备份</option>
         <option value="发送周报">发送周报</option>
         <option value="测试发送周报">测试发送周报</option>
@@ -497,11 +499,15 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
       <button class="log-close" onclick="closePerm()">✕</button>
     </div>
     <div style="padding:14px 18px 6px">
-      <div style="background:#e8f0fe;border-left:4px solid #1a3a8f;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a8f;margin-bottom:14px">只有下方名单里的邮箱才能登录看板；勾选"管理员"可赋予新增/编辑/删除等全部权限，否则为普通责任人权限。</div>
+      <div style="background:#e8f0fe;border-left:4px solid #1a3a8f;padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#1a3a8f;margin-bottom:14px">只有下方名单里的邮箱才能登录看板。角色说明：<b>责任人</b>=普通参与；<b>录入员</b>=可新增待办/下载模板/批量上传，只能改自己录入的待办，不能备份下载；<b>管理员</b>=全部权限。</div>
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
         <input id="perm-name" placeholder="姓名" style="flex:1;min-width:90px;padding:8px 10px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit">
         <input id="perm-email" placeholder="邮箱" style="flex:1.6;min-width:160px;padding:8px 10px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit">
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#555;white-space:nowrap"><input type="checkbox" id="perm-admin" style="width:auto">设为管理员</label>
+        <select id="perm-role" style="flex:0 0 auto;padding:8px 10px;border:1.5px solid #c5cae9;border-radius:7px;font-size:13px;font-family:inherit">
+          <option value="person">责任人</option>
+          <option value="editor">录入员（可新增/批量上传）</option>
+          <option value="admin">管理员</option>
+        </select>
         <button class="bsave" style="padding:8px 16px;font-size:12px" onclick="addPerm()">＋ 添加</button>
       </div>
     </div>
@@ -607,6 +613,15 @@ function enter() {
     document.getElementById('bexport').style.display = '';
     document.getElementById('btn-log').style.display = '';
     document.getElementById('btn-perm').style.display = '';
+    document.getElementById('bmine').style.display = 'none';
+  } else if (S.role === 'editor') {
+    b.textContent = '录入员 · ' + S.name; b.className = 'badge b-editor';
+    document.getElementById('badd').style.display = '';
+    document.getElementById('btpl').style.display = '';
+    document.getElementById('bbatch').style.display = '';
+    document.getElementById('bexport').style.display = 'none';
+    document.getElementById('btn-log').style.display = 'none';
+    document.getElementById('btn-perm').style.display = 'none';
     document.getElementById('bmine').style.display = 'none';
   } else {
     b.textContent = '👤 ' + S.name; b.className = 'badge b-person';
@@ -790,10 +805,16 @@ function renderDetail() {
               '<span class="sund">● 未完成</span>';
     var subUrl = row.submit_url ? linkify(row.submit_url) : '<span style="color:#bbb;font-size:12px">—</span>';
     var eb = '<button class="bpub" onclick="openPublic('+row.id+')">✏ 填写</button>';
+    var mineCreated = (row.created_by_email||'').toLowerCase() === (S.email||'').toLowerCase();
     if (S.role==='admin') {
       eb = '<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+
            '<button class="bd" onclick="delRow('+row.id+')">🗑</button>'+
            '<br><button class="bpub" style="margin-top:3px" onclick="openPublic('+row.id+')">✏ 填写</button>';
+    } else if (S.role==='editor') {
+      eb = mineCreated
+        ? '<button class="be" onclick="openEdit('+row.id+')">✏ 编辑</button>'+
+          '<br><button class="bpub" style="margin-top:3px" onclick="openPublic('+row.id+')">✏ 填写</button>'
+        : '<span style="color:#bbb;font-size:11px">仅可修改本人录入</span>';
     }
     var progressCell = '<div class="ptxt">'+(row.progress||'<span style="color:#bbb">暂无进展</span>')+'</div>'+
       (row.updated_at?'<div class="umeta">'+row.updated_at+(row.updated_by?' by '+row.updated_by:'')+'</div>':'');
@@ -856,9 +877,10 @@ function openEdit(id) {
   document.getElementById('est').value = row.status   || '未完成';
   document.getElementById('elc').value = row.livox_confirm || '未完成';
   var adm = S.role==='admin';
-  document.getElementById('aonly').style.display = adm ? '' : 'none';
+  var canEditBasic = (S.role==='admin' || S.role==='editor');
+  document.getElementById('aonly').style.display = canEditBasic ? '' : 'none';
   document.getElementById('lc-field').style.display = adm ? '' : 'none';
-  if (adm) {
+  if (canEditBasic) {
     document.getElementById('ei').value = row.item || '';
     document.getElementById('ep').value = row.person || '';
     document.getElementById('eini').value = row.initiator || '';
@@ -988,7 +1010,7 @@ function openAdd() {
   document.getElementById('eid').value = '';
   document.getElementById('mtitle').textContent = '＋ 新增事项';
   document.getElementById('aonly').style.display = '';
-  document.getElementById('lc-field').style.display = '';
+  document.getElementById('lc-field').style.display = (S.role==='admin') ? '' : 'none';
   ['ei','ep','el','es','ed','eu','epg','ernote','eini'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('est').value = '未完成';
   document.getElementById('elc').value = '未完成';
@@ -1002,17 +1024,18 @@ function closeM() { document.getElementById('modal').className = 'mbg'; }
 function saveM() {
   var id  = document.getElementById('eid').value;
   var adm = S.role==='admin';
+  var canEditBasic = (S.role==='admin' || S.role==='editor');
   var body = {progress: document.getElementById('epg').value, status: document.getElementById('est').value};
-  if (adm) {
+  if (canEditBasic) {
     Object.assign(body, {
       item: document.getElementById('ei').value, person: document.getElementById('ep').value,
       initiator: document.getElementById('eini').value,
       livox: document.getElementById('el').value, submit: document.getElementById('es').value,
       ddl:  document.getElementById('ed').value, submit_url: document.getElementById('eu').value,
-      livox_confirm: document.getElementById('elc').value,
       priority: document.getElementById('epr').value
     });
     Object.assign(body, collectRecurFields());
+    if (adm) body.livox_confirm = document.getElementById('elc').value;
   }
   var hdrs = {'Content-Type':'application/json','X-Session':S.token};
   var url = id ? ('/api/update/'+id) : '/api/add';
@@ -1165,7 +1188,7 @@ function renderLog() {
   var em = document.getElementById('log-empty');
   if (!rows.length) { tb.innerHTML=''; em.style.display=''; return; }
   em.style.display = 'none';
-  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','导出备份':'la-edit','发送周报':'la-pub','测试发送周报':'la-pub','发送DDL提醒':'la-pub','邮件测试':'la-pub','登录':'la-login'};
+  var acls = {'公开填写':'la-pub','编辑事项':'la-edit','新增事项':'la-add','删除事项':'la-del','批量导入':'la-add','新增权限':'la-add','删除权限':'la-del','修改权限':'la-edit','导出备份':'la-edit','发送周报':'la-pub','测试发送周报':'la-pub','发送DDL提醒':'la-pub','邮件测试':'la-pub','登录':'la-login'};
   tb.innerHTML = rows.map(function(r){
     return '<tr><td style="white-space:nowrap">'+r.time+'</td><td><strong>'+r.operator+'</strong></td>'+
       '<td><span class="'+(acls[r.action]||'la-edit')+'">'+r.action+'</span></td>'+
@@ -1187,22 +1210,29 @@ function loadPerm() {
     var el = document.getElementById('perm-list');
     if (!list.length) { el.innerHTML = '<div style="text-align:center;color:#bbb;padding:24px">暂无授权名单</div>'; return; }
     el.innerHTML = list.map(function(c){
-      var badge = c.role==='admin'
-        ? '<span class="badge b-admin" style="font-size:11px;padding:2px 9px">管理员</span>'
-        : '<span style="color:#999;font-size:12px">责任人</span>';
+      var role = c.role || 'person';
+      var opt = function(v, t){ return '<option value="'+v+'"'+(role===v?' selected':'')+'>'+t+'</option>'; };
       return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;font-size:13px">'+
         '<span style="flex:1;font-weight:600">'+c.name+'</span>'+
         '<span style="flex:1.6;color:#666">'+c.email+'</span>'+
-        '<span style="width:56px;text-align:center">'+badge+'</span>'+
+        '<select onchange="changePermRole(\''+c.email.replace(/'/g,"\\'")+'\', this.value)" style="padding:4px 8px;border:1.5px solid #c5cae9;border-radius:6px;font-size:12px;font-family:inherit">'+
+          opt('person','责任人')+opt('editor','录入员')+opt('admin','管理员')+
+        '</select>'+
         '<button class="bd" onclick="delPerm(\''+c.email.replace(/'/g,"\\'")+'\')">🗑</button></div>';
     }).join('');
   })
   .catch(function(){ document.getElementById('perm-list').innerHTML = '<div style="text-align:center;color:#c62828;padding:24px">加载失败</div>'; });
 }
+function changePermRole(email, role) {
+  fetch('/api/contacts/role', {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify({email:email, role:role})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if (d.ok) showT('角色已更新','ok'); else { showT(d.msg||'修改失败','err'); loadPerm(); } })
+  .catch(function(){ showT('请求失败','err'); loadPerm(); });
+}
 function addPerm() {
   var name  = document.getElementById('perm-name').value.trim();
   var email = document.getElementById('perm-email').value.trim().toLowerCase();
-  var role  = document.getElementById('perm-admin').checked ? 'admin' : 'person';
+  var role  = document.getElementById('perm-role').value;
   if (!name || !email) { showT('请填写姓名和邮箱','err'); return; }
   fetch('/api/contacts', {method:'POST', headers:{'Content-Type':'application/json','X-Session':S.token}, body:JSON.stringify({name:name,email:email,role:role})})
   .then(function(r){ return r.json(); })
@@ -1211,7 +1241,7 @@ function addPerm() {
       showT('已添加授权','ok');
       document.getElementById('perm-name').value = '';
       document.getElementById('perm-email').value = '';
-      document.getElementById('perm-admin').checked = false;
+      document.getElementById('perm-role').value = 'person';
       loadPerm();
     } else showT(d.msg || '添加失败', 'err');
   }).catch(function(){ showT('请求失败','err'); });
