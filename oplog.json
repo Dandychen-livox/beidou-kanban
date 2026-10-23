@@ -534,5 +534,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 07:29:32",
+    "operator": "Dandy.chen",
+    "action": "新增权限",
+    "item_id": null,
+    "item_name": "Sophie.hu",
+    "detail": "邮箱:sophie.h@livoxtech.com；角色:责任人"
   }
 ]
