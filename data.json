@@ -538,5 +538,28 @@
     "status_done_at": "",
     "updated_at": "2026-10-23 00:32",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 25,
+    "date": "2026-10-23",
+    "item": "上海华翔冲突复核发起确认",
+    "submit": "收集上海华翔年框相关信息",
+    "ddl": "2026-10-30",
+    "initiator": "Dandy",
+    "person": "李建萍",
+    "livox": "",
+    "priority": "低",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "updated_at": "2026-10-23 00:34",
+    "updated_by": "Dandy.chen"
   }
 ]
