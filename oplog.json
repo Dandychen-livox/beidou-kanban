@@ -438,5 +438,13 @@
     "item_id": 25,
     "item_name": "上海华翔冲突复核发起确认",
     "detail": ""
+  },
+  {
+    "time": "2026-10-23 00:39:58",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
   }
 ]
