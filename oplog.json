@@ -470,5 +470,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-23 04:27:01",
+    "operator": "wei.ma",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "wei.ma@livoxtech.com（管理员）"
   }
 ]
