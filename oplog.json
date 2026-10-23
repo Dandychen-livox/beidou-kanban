@@ -374,5 +374,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "收件1人：xiaodanchen@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-10-23 00:27:04",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": ""
   }
 ]
