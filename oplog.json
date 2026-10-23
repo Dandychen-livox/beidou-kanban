@@ -494,5 +494,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "kerwin.wang@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-10-23 06:19:55",
+    "operator": "Nathan.song",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "songzhiyu@livoxtech.com（管理员）"
   }
 ]
