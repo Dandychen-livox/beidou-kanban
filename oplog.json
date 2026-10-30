@@ -646,5 +646,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-30 16:09:52",
+    "operator": "系统",
+    "action": "发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件19人：peihe.xu@ronwelltech.com,peiyunzhou@ronwelltech.com,mingliang.chen@ronwelltech.com,yuhuxiao@ronwelltech.com,yangshuo@ronwelltech.com,lijp@ronwelltech.com,chenxuemei@ronwelltech.com,xia.chen@ronwelltech.com,yanghaiyue@bdstar.com,yunfei.zhao@ronwelltech.com,zhijian.zhang@ronwelltech.com,xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,Jessica.li@livoxtech.com,karson.chen@livoxtech.com,wei.ma@livoxtech.com,kerwin.wang@livoxtech.com,xuhui.liu@livoxtech.com,sophie.h@livoxtech.com；成功"
   }
 ]
