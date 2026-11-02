@@ -678,5 +678,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "yangshuo@ronwelltech.com"
+  },
+  {
+    "time": "2026-11-02 01:10:10",
+    "operator": "杨朔",
+    "action": "公开填写",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": "进展:已提交文档"
   }
 ]
