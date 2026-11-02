@@ -702,5 +702,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "peihe.xu@ronwelltech.com"
+  },
+  {
+    "time": "2026-11-02 19:21:29",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
