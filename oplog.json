@@ -710,5 +710,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-03 16:55:12",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
