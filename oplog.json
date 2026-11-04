@@ -726,5 +726,13 @@
     "item_id": 21,
     "item_name": "TOP25客户调研",
     "detail": "进展:已经通过邮件发送完毕！；状态→完成"
+  },
+  {
+    "time": "2026-11-04 16:58:31",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
   }
 ]
