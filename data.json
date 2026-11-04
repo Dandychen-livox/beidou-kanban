@@ -461,14 +461,14 @@
     "recur_type": "",
     "recur_value": "",
     "recur_note": "",
-    "progress": "",
+    "progress": "已经通过邮件发送完毕！",
     "submit_url": "",
-    "status": "未完成",
+    "status": "完成",
     "livox_confirm": "未完成",
     "completed_at": "",
-    "status_done_at": "",
-    "updated_at": "2026-10-23 00:32",
-    "updated_by": "Dandy.chen"
+    "status_done_at": "2026-11-04 03:24",
+    "updated_at": "2026-11-04 03:24",
+    "updated_by": "肖玉虎"
   },
   {
     "id": 22,
