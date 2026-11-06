@@ -486,11 +486,11 @@
     "recur_note": "",
     "progress": "",
     "submit_url": "",
-    "status": "未完成",
-    "livox_confirm": "未完成",
-    "completed_at": "",
-    "status_done_at": "",
-    "updated_at": "2026-10-23 00:29",
+    "status": "完成",
+    "livox_confirm": "完成",
+    "completed_at": "2026-11-06 01:06",
+    "status_done_at": "2026-11-06 01:06",
+    "updated_at": "2026-11-06 01:06",
     "updated_by": "Dandy.chen"
   },
   {
