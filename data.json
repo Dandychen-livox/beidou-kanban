@@ -464,11 +464,11 @@
     "progress": "已经通过邮件发送完毕！",
     "submit_url": "",
     "status": "完成",
-    "livox_confirm": "未完成",
-    "completed_at": "",
+    "livox_confirm": "完成",
+    "completed_at": "2026-11-06 01:05",
     "status_done_at": "2026-11-04 03:24",
-    "updated_at": "2026-11-04 03:24",
-    "updated_by": "肖玉虎"
+    "updated_at": "2026-11-06 01:05",
+    "updated_by": "Dandy.chen"
   },
   {
     "id": 22,
