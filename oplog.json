@@ -782,5 +782,13 @@
     "item_id": 22,
     "item_name": "26年总结以及27年计划",
     "detail": "进展:；状态→完成；Livox确认→完成；责任人→周培云；优先级→高"
+  },
+  {
+    "time": "2026-11-06 16:40:01",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
