@@ -561,5 +561,30 @@
     "status_done_at": "2026-11-06 01:06",
     "updated_at": "2026-11-06 01:06",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 26,
+    "date": "2026-11-11",
+    "item": "Mid-360L客户案例模板提交",
+    "submit": "客户案例模板提交*3篇",
+    "ddl": "2026-11-12",
+    "initiator": "Dandy",
+    "person": "杨朔",
+    "livox": "Dandy",
+    "priority": "高",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-11 01:23",
+    "updated_by": "Dandy.chen"
   }
 ]
