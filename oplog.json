@@ -822,5 +822,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-11 01:23:47",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 26,
+    "item_name": "Mid-360L客户案例模板提交",
+    "detail": ""
   }
 ]
