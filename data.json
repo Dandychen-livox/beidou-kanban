@@ -586,5 +586,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-11 01:23",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 27,
+    "date": "2026-11-11",
+    "item": "未来2级渠道备选以及价格方案",
+    "submit": "",
+    "ddl": "2026-11-11",
+    "initiator": "Dandy",
+    "person": "周培云",
+    "livox": "Dandy",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-11 01:24",
+    "updated_by": "Dandy.chen"
   }
 ]
