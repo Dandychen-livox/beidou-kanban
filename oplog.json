@@ -854,5 +854,13 @@
     "item_id": 27,
     "item_name": "未来白牌：Mid-360/Mid-360",
     "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-11 17:00:03",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
