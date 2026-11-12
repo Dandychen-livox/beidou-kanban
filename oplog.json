@@ -542,5 +542,357 @@
     "item_id": null,
     "item_name": "Sophie.hu",
     "detail": "邮箱:sophie.h@livoxtech.com；角色:责任人"
+  },
+  {
+    "time": "2026-10-23 08:47:47",
+    "operator": "Dandy.chen",
+    "action": "修改权限",
+    "item_id": null,
+    "item_name": "李建萍",
+    "detail": "邮箱:lijp@ronwelltech.com；角色→录入员"
+  },
+  {
+    "time": "2026-10-23 14:09:13",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-23 14:21:11",
+    "operator": "系统",
+    "action": "发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件19人：peihe.xu@ronwelltech.com,peiyunzhou@ronwelltech.com,mingliang.chen@ronwelltech.com,yuhuxiao@ronwelltech.com,yangshuo@ronwelltech.com,lijp@ronwelltech.com,chenxuemei@ronwelltech.com,xia.chen@ronwelltech.com,yanghaiyue@bdstar.com,yunfei.zhao@ronwelltech.com,zhijian.zhang@ronwelltech.com,xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,Jessica.li@livoxtech.com,karson.chen@livoxtech.com,wei.ma@livoxtech.com,kerwin.wang@livoxtech.com,xuhui.liu@livoxtech.com,sophie.h@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-10-24 13:12:34",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-25 13:38:34",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-26 04:03:16",
+    "operator": "肖玉虎",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "yuhuxiao@ronwelltech.com"
+  },
+  {
+    "time": "2026-10-26 04:03:19",
+    "operator": "肖玉虎",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "yuhuxiao@ronwelltech.com"
+  },
+  {
+    "time": "2026-10-26 09:44:02",
+    "operator": "杨海月",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "yanghaiyue@bdstar.com"
+  },
+  {
+    "time": "2026-10-26 16:00:26",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-27 15:14:55",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-28 15:50:53",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
+  },
+  {
+    "time": "2026-10-29 15:57:58",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-30 15:44:51",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-10-30 16:09:52",
+    "operator": "系统",
+    "action": "发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件19人：peihe.xu@ronwelltech.com,peiyunzhou@ronwelltech.com,mingliang.chen@ronwelltech.com,yuhuxiao@ronwelltech.com,yangshuo@ronwelltech.com,lijp@ronwelltech.com,chenxuemei@ronwelltech.com,xia.chen@ronwelltech.com,yanghaiyue@bdstar.com,yunfei.zhao@ronwelltech.com,zhijian.zhang@ronwelltech.com,xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,Jessica.li@livoxtech.com,karson.chen@livoxtech.com,wei.ma@livoxtech.com,kerwin.wang@livoxtech.com,xuhui.liu@livoxtech.com,sophie.h@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-10-31 15:13:23",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
+  },
+  {
+    "time": "2026-11-01 15:54:40",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知4人，成功4"
+  },
+  {
+    "time": "2026-11-02 01:09:34",
+    "operator": "杨朔",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "yangshuo@ronwelltech.com"
+  },
+  {
+    "time": "2026-11-02 01:10:10",
+    "operator": "杨朔",
+    "action": "公开填写",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": "进展:已提交文档"
+  },
+  {
+    "time": "2026-11-02 01:10:28",
+    "operator": "杨朔",
+    "action": "公开填写",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": "进展:已提交文档；状态→完成"
+  },
+  {
+    "time": "2026-11-02 09:31:37",
+    "operator": "徐培贺",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "peihe.xu@ronwelltech.com"
+  },
+  {
+    "time": "2026-11-02 19:21:29",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-03 16:55:12",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-04 03:24:56",
+    "operator": "肖玉虎",
+    "action": "公开填写",
+    "item_id": 21,
+    "item_name": "TOP25客户调研",
+    "detail": "进展:已经通过邮件发送完毕！；状态→完成"
+  },
+  {
+    "time": "2026-11-04 16:58:31",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
+  },
+  {
+    "time": "2026-11-05 17:15:00",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
+  },
+  {
+    "time": "2026-11-06 01:05:35",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-11-06 01:05:54",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 21,
+    "item_name": "TOP25客户调研",
+    "detail": "进展:已经通过邮件发送完毕！；状态→完成；Livox确认→完成；责任人→肖玉虎；优先级→高"
+  },
+  {
+    "time": "2026-11-06 01:05:59",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 20,
+    "item_name": "Mid-360L客户分级调研",
+    "detail": "进展:已提交文档；状态→完成；Livox确认→完成；责任人→杨朔；优先级→中"
+  },
+  {
+    "time": "2026-11-06 01:06:13",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 25,
+    "item_name": "上海华翔冲突复核发起确认",
+    "detail": "进展:；状态→完成；Livox确认→完成；责任人→李建萍；优先级→低"
+  },
+  {
+    "time": "2026-11-06 01:06:21",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 22,
+    "item_name": "26年总结以及27年计划",
+    "detail": "进展:；状态→完成；Livox确认→完成；责任人→周培云；优先级→高"
+  },
+  {
+    "time": "2026-11-06 16:40:01",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-06 16:53:22",
+    "operator": "系统",
+    "action": "发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件19人：peihe.xu@ronwelltech.com,peiyunzhou@ronwelltech.com,mingliang.chen@ronwelltech.com,yuhuxiao@ronwelltech.com,yangshuo@ronwelltech.com,lijp@ronwelltech.com,chenxuemei@ronwelltech.com,xia.chen@ronwelltech.com,yanghaiyue@bdstar.com,yunfei.zhao@ronwelltech.com,zhijian.zhang@ronwelltech.com,xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,Jessica.li@livoxtech.com,karson.chen@livoxtech.com,wei.ma@livoxtech.com,kerwin.wang@livoxtech.com,xuhui.liu@livoxtech.com,sophie.h@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-11-07 15:33:51",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-09 19:40:31",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-10 16:55:03",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-11 01:23:47",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 26,
+    "item_name": "Mid-360L客户案例模板提交",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-11 01:24:49",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 27,
+    "item_name": "未来2级渠道备选以及价格方案",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-11 01:26:10",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 28,
+    "item_name": " CEMAT物流展复盘（销售层面）：主要",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-11 01:26:46",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 27,
+    "item_name": "未来白牌：Mid-360/Mid-360",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-11 17:00:03",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-12 01:39:35",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-11-12 01:39:52",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-12 01:39:53",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 29,
+    "item_name": "录入员权限自测（可删除）",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-12 01:40:09",
+    "operator": "Dandy.chen",
+    "action": "删除事项",
+    "item_id": 29,
+    "item_name": "录入员权限自测（可删除）",
+    "detail": ""
   }
 ]
