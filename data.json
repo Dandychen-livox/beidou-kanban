@@ -636,5 +636,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-11 01:26",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 29,
+    "date": "2026-11-12",
+    "item": "录入员权限自测（可删除）",
+    "submit": "",
+    "ddl": "",
+    "initiator": "",
+    "person": "",
+    "livox": "Dandy",
+    "priority": "低",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "lijp@ronwelltech.com",
+    "created_by": "李建萍",
+    "updated_at": "2026-11-12 01:39",
+    "updated_by": "李建萍"
   }
 ]
