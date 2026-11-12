@@ -862,5 +862,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-12 01:39:35",
+    "operator": "Dandy.chen",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "xiaodanchen@livoxtech.com（管理员）"
   }
 ]
