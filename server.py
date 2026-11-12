@@ -511,6 +511,12 @@ def api_data():
     require_session(request)
     return jsonify(read_data())
 
+@app.route('/api/me')
+def api_me():
+    """返回当前登录者的最新身份/角色（角色以通讯录为准，管理员改角色后刷新即可生效）"""
+    sess = require_session(request)
+    return jsonify({'ok': True, 'email': sess['email'], 'name': sess['name'], 'role': sess['role']})
+
 @app.route('/api/auth', methods=['POST'])
 def api_auth():
     """邮箱登录：

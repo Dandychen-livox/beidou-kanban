@@ -1366,7 +1366,20 @@ document.getElementById('weekly-test-modal').onclick=function(e){ if(e.target===
   if (saved && saved.token && saved.email) {
     S = {role:saved.role, name:saved.name, email:saved.email, token:saved.token, showAllDone:S.showAllDone};
     enter();
-    load();
+    // 向服务器核实最新角色（管理员调整角色后，刷新页面即可生效，无需重新登录）
+    fetch('/api/me', {headers:{'X-Session': S.token}})
+      .then(function(r){
+        if (r.status === 401) { doLogout(); return null; }
+        return r.json();
+      })
+      .then(function(me){
+        if (!me) return;
+        S.role = me.role; S.name = me.name; S.email = me.email;
+        try { localStorage.setItem('kanban_session', JSON.stringify({role:S.role,name:S.name,email:S.email,token:S.token})); } catch(e){}
+        enter();
+        load();
+      })
+      .catch(function(){ load(); });
   } else {
     showLogin();
   }
