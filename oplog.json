@@ -918,5 +918,13 @@
     "item_id": 29,
     "item_name": "录入员新增自测2（稍后删除）",
     "detail": ""
+  },
+  {
+    "time": "2026-11-12 01:45:40",
+    "operator": "Dandy.chen",
+    "action": "删除事项",
+    "item_id": 29,
+    "item_name": "录入员新增自测2（稍后删除）",
+    "detail": ""
   }
 ]
