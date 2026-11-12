@@ -926,5 +926,13 @@
     "item_id": 29,
     "item_name": "录入员新增自测2（稍后删除）",
     "detail": ""
+  },
+  {
+    "time": "2026-11-12 17:28:45",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
