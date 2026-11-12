@@ -886,5 +886,13 @@
     "item_id": 29,
     "item_name": "录入员权限自测（可删除）",
     "detail": ""
+  },
+  {
+    "time": "2026-11-12 01:40:09",
+    "operator": "Dandy.chen",
+    "action": "删除事项",
+    "item_id": 29,
+    "item_name": "录入员权限自测（可删除）",
+    "detail": ""
   }
 ]
