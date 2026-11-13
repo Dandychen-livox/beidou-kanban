@@ -934,5 +934,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-13 04:29:26",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 29,
+    "item_name": "备料策略变化说明以及后续策略",
+    "detail": ""
   }
 ]
