@@ -711,5 +711,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-13 06:00",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 32,
+    "date": "2026-11-13",
+    "item": "Mid-360L&Mid-360S目标场景细化",
+    "submit": "1.Mid-360L以及Mid-360S目标场景区分",
+    "ddl": "2026-11-17",
+    "initiator": "Dandy",
+    "person": "周培云",
+    "livox": "",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-13 07:03",
+    "updated_by": "Dandy.chen"
   }
 ]
