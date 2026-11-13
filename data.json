@@ -786,5 +786,30 @@
     "created_by": "李建萍",
     "updated_at": "2026-11-13 07:07",
     "updated_by": "李建萍"
+  },
+  {
+    "id": 35,
+    "date": "2026-11-13",
+    "item": "360L重定位久：协调研发时间，与客户拉会沟通",
+    "submit": "",
+    "ddl": "2026-11-16",
+    "initiator": "Aileen",
+    "person": "Karson",
+    "livox": "",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "lijp@ronwelltech.com",
+    "created_by": "李建萍",
+    "updated_at": "2026-11-13 07:09",
+    "updated_by": "李建萍"
   }
 ]
