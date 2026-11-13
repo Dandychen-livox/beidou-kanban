@@ -990,5 +990,13 @@
     "item_id": 28,
     "item_name": " CEMAT物流展复盘（销售层面）：主要",
     "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-13 06:01:44",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 27,
+    "item_name": "未来白牌：Mid-360/Mid-360",
+    "detail": "进展:；状态→未完成；Livox确认→完成；责任人→周培云；优先级→中"
   }
 ]
