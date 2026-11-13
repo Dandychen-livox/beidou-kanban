@@ -1062,5 +1062,13 @@
     "item_id": 33,
     "item_name": "360L对比360S出厂IMU数据分析",
     "detail": "进展:；状态→未完成；责任人→Karson.chen；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:07:58",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 34,
+    "item_name": "回吸点云改善答复",
+    "detail": ""
   }
 ]
