@@ -1022,5 +1022,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-13 07:03:49",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 32,
+    "item_name": "Mid-360L&Mid-360S目标场",
+    "detail": ""
   }
 ]
