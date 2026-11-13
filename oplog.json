@@ -942,5 +942,13 @@
     "item_id": 29,
     "item_name": "备料策略变化说明以及后续策略",
     "detail": ""
+  },
+  {
+    "time": "2026-11-13 05:59:27",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 30,
+    "item_name": "Mid-360L/Mid-360S对外阶",
+    "detail": ""
   }
 ]
