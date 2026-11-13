@@ -636,5 +636,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-11 01:26",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 29,
+    "date": "2026-11-13",
+    "item": "备料策略变化说明以及后续策略",
+    "submit": "1.预测备料策略变化资料发送\n2.2026年11月17日会议讨论",
+    "ddl": "2026-11-17",
+    "initiator": "Dandy",
+    "person": "陈铭亮",
+    "livox": "",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-13 04:29",
+    "updated_by": "Dandy.chen"
   }
 ]
