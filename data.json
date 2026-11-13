@@ -811,5 +811,30 @@
     "created_by": "李建萍",
     "updated_at": "2026-11-13 07:09",
     "updated_by": "李建萍"
+  },
+  {
+    "id": 36,
+    "date": "2026-11-13",
+    "item": "360L和AVIA2重点客户测试报告回收",
+    "submit": "",
+    "ddl": "",
+    "initiator": "Aileen",
+    "person": "赵云飞",
+    "livox": "",
+    "priority": "中",
+    "recurring": true,
+    "recur_type": "每周",
+    "recur_value": "5",
+    "recur_note": "每周周五",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "lijp@ronwelltech.com",
+    "created_by": "李建萍",
+    "updated_at": "2026-11-13 07:09",
+    "updated_by": "李建萍"
   }
 ]
