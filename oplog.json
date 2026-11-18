@@ -1206,5 +1206,13 @@
     "item_id": 39,
     "item_name": "Avia2测试报告15篇",
     "detail": ""
+  },
+  {
+    "time": "2026-11-18 17:55:03",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知3人，成功3"
   }
 ]
