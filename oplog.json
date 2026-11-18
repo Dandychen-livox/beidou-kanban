@@ -1182,5 +1182,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "songzhiyu@livoxtech.com（管理员）"
+  },
+  {
+    "time": "2026-11-18 13:24:06",
+    "operator": "Nathan.song",
+    "action": "新增事项",
+    "item_id": 38,
+    "item_name": "【重要】JT128AR96竞品内容更新",
+    "detail": ""
   }
 ]
