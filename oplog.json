@@ -894,5 +894,285 @@
     "item_id": 29,
     "item_name": "录入员权限自测（可删除）",
     "detail": ""
+  },
+  {
+    "time": "2026-11-12 01:45:06",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-12 01:45:28",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-12 01:45:28",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 29,
+    "item_name": "录入员新增自测2（稍后删除）",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-12 01:45:40",
+    "operator": "Dandy.chen",
+    "action": "删除事项",
+    "item_id": 29,
+    "item_name": "录入员新增自测2（稍后删除）",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-12 17:28:45",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-13 04:29:26",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 29,
+    "item_name": "备料策略变化说明以及后续策略",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 05:59:27",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 30,
+    "item_name": "Mid-360L/Mid-360S对外阶",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 06:00:39",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 31,
+    "item_name": "Mid-360S大项目价格诉求",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 06:00:45",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 29,
+    "item_name": "备料策略变化说明以及后续策略",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→陈铭亮；优先级→高"
+  },
+  {
+    "time": "2026-11-13 06:00:54",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 31,
+    "item_name": "Mid-360S大项目价格诉求",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→高"
+  },
+  {
+    "time": "2026-11-13 06:01:11",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 30,
+    "item_name": "Mid-360L/Mid-360S对外阶",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→高"
+  },
+  {
+    "time": "2026-11-13 06:01:31",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 28,
+    "item_name": " CEMAT物流展复盘（销售层面）：主要",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-13 06:01:44",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 27,
+    "item_name": "未来白牌：Mid-360/Mid-360",
+    "detail": "进展:；状态→未完成；Livox确认→完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-13 06:02:20",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 23,
+    "item_name": "27年BP制定全量客户预测",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→高"
+  },
+  {
+    "time": "2026-11-13 06:02:28",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 24,
+    "item_name": "手持测绘行业洞察",
+    "detail": "进展:；状态→未完成；Livox确认→未完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:02:51",
+    "operator": "李建萍",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-13 07:03:49",
+    "operator": "Dandy.chen",
+    "action": "新增事项",
+    "item_id": 32,
+    "item_name": "Mid-360L&Mid-360S目标场",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:04:37",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 33,
+    "item_name": "360L对比360S出厂IMU数据分析",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:05:57",
+    "operator": "李建萍",
+    "action": "编辑事项",
+    "item_id": 33,
+    "item_name": "360L对比360S出厂IMU数据分析",
+    "detail": "进展:；状态→未完成；责任人→Karson.chen；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:05:57",
+    "operator": "李建萍",
+    "action": "编辑事项",
+    "item_id": 33,
+    "item_name": "360L对比360S出厂IMU数据分析",
+    "detail": "进展:；状态→未完成；责任人→Karson.chen；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:05:57",
+    "operator": "李建萍",
+    "action": "编辑事项",
+    "item_id": 33,
+    "item_name": "360L对比360S出厂IMU数据分析",
+    "detail": "进展:；状态→未完成；责任人→Karson.chen；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:07:58",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 34,
+    "item_name": "回吸点云改善答复",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:08:18",
+    "operator": "李建萍",
+    "action": "编辑事项",
+    "item_id": 33,
+    "item_name": "360L对比360S出厂IMU数据分析",
+    "detail": "进展:；状态→未完成；责任人→Karson；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:09:06",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 35,
+    "item_name": "360L重定位久：协调研发时间，与客户拉",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:09:48",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 36,
+    "item_name": "360L和AVIA2重点客户测试报告回收",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:10:22",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 26,
+    "item_name": "Mid-360L客户案例模板提交",
+    "detail": "进展:；状态→完成；Livox确认→完成；责任人→杨朔；优先级→高"
+  },
+  {
+    "time": "2026-11-13 07:10:30",
+    "operator": "Dandy.chen",
+    "action": "编辑事项",
+    "item_id": 27,
+    "item_name": "未来白牌：Mid-360/Mid-360",
+    "detail": "进展:；状态→完成；Livox确认→完成；责任人→周培云；优先级→中"
+  },
+  {
+    "time": "2026-11-13 07:10:38",
+    "operator": "李建萍",
+    "action": "新增事项",
+    "item_id": 37,
+    "item_name": "了解万集722（16线）、禾赛JT16、",
+    "detail": ""
+  },
+  {
+    "time": "2026-11-13 07:10:55",
+    "operator": "李建萍",
+    "action": "编辑事项",
+    "item_id": 36,
+    "item_name": "360L和AVIA2重点客户测试报告回收",
+    "detail": "进展:；状态→未完成；责任人→赵云飞；优先级→中"
+  },
+  {
+    "time": "2026-11-13 17:02:42",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-11-13 17:20:12",
+    "operator": "系统",
+    "action": "发送周报",
+    "item_id": null,
+    "item_name": null,
+    "detail": "收件19人：peihe.xu@ronwelltech.com,peiyunzhou@ronwelltech.com,mingliang.chen@ronwelltech.com,yuhuxiao@ronwelltech.com,yangshuo@ronwelltech.com,lijp@ronwelltech.com,chenxuemei@ronwelltech.com,xia.chen@ronwelltech.com,yanghaiyue@bdstar.com,yunfei.zhao@ronwelltech.com,zhijian.zhang@ronwelltech.com,xiaodanchen@livoxtech.com,songzhiyu@livoxtech.com,Jessica.li@livoxtech.com,karson.chen@livoxtech.com,wei.ma@livoxtech.com,kerwin.wang@livoxtech.com,xuhui.liu@livoxtech.com,sophie.h@livoxtech.com；成功"
+  },
+  {
+    "time": "2026-11-14 15:41:07",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
+  },
+  {
+    "time": "2026-11-15 16:12:20",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
+  },
+  {
+    "time": "2026-11-16 19:27:34",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知0人，成功0"
+  },
+  {
+    "time": "2026-11-17 18:20:40",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知2人，成功2"
   }
 ]
