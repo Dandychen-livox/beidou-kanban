@@ -886,5 +886,30 @@
     "created_by": "Nathan.song",
     "updated_at": "2026-11-18 13:25",
     "updated_by": "Nathan.song"
+  },
+  {
+    "id": 39,
+    "date": "2026-11-18",
+    "item": "Avia2测试报告15篇",
+    "submit": "",
+    "ddl": "2026-11-27",
+    "initiator": "Nathan",
+    "person": "杨朔",
+    "livox": "Nathan",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "songzhiyu@livoxtech.com",
+    "created_by": "Nathan.song",
+    "updated_at": "2026-11-18 13:31",
+    "updated_by": "Nathan.song"
   }
 ]
