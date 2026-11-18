@@ -79,7 +79,13 @@ tr.tot td{background:#d9e2f4;font-weight:700;border-top:2px solid #1a3a8f}
 .bexport{padding:6px 14px;background:#2e7d32;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;margin-left:4px}
 .bexport:hover{background:#1b5e20}
 /* 明细表 */
-.dtbl{margin:0 18px 28px;border-radius:5px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.dtbl{margin:0 18px 28px;border-radius:5px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+/* 操作列固定在右侧，表格横向滚动时始终可见 */
+.dt thead th:last-child,.dt tbody td:last-child{position:sticky;right:0;z-index:2;box-shadow:-3px 0 6px rgba(0,0,0,.06)}
+.dt thead th:last-child{z-index:3}
+.dt tbody td:last-child{background:#fff}
+.dt tbody tr:nth-child(even) td:last-child{background:#f6f8ff}
+.dt tbody tr:hover td:last-child{background:#edf0ff}
 .dtbl-hdr{background:#1a3a8f;padding:9px 15px}
 .dtbl-hdr span{color:#fff;font-size:13px;font-weight:700}
 .dtbl-hdr2{background:#00838f;padding:9px 15px}
