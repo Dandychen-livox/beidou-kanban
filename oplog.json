@@ -1230,5 +1230,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "lijp@ronwelltech.com（录入员）"
+  },
+  {
+    "time": "2026-11-20 17:40:41",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知3人，成功3"
   }
 ]
