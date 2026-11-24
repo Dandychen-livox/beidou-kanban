@@ -1278,5 +1278,13 @@
     "item_id": null,
     "item_name": null,
     "detail": "通知3人，成功3"
+  },
+  {
+    "time": "2026-11-24 23:11:49",
+    "operator": "陈铭亮",
+    "action": "登录",
+    "item_id": null,
+    "item_name": null,
+    "detail": "mingliang.chen@ronwelltech.com"
   }
 ]
