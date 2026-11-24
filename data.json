@@ -651,16 +651,16 @@
     "recur_type": "",
     "recur_value": "",
     "recur_note": "",
-    "progress": "",
-    "submit_url": "",
-    "status": "未完成",
+    "progress": "已提交",
+    "submit_url": "邮件",
+    "status": "完成",
     "livox_confirm": "未完成",
     "completed_at": "",
-    "status_done_at": "",
+    "status_done_at": "2026-11-24 23:13",
     "created_by_email": "xiaodanchen@livoxtech.com",
     "created_by": "Dandy.chen",
-    "updated_at": "2026-11-13 06:00",
-    "updated_by": "Dandy.chen"
+    "updated_at": "2026-11-24 23:13",
+    "updated_by": "陈铭亮"
   },
   {
     "id": 30,
