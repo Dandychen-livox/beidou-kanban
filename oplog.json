@@ -1294,5 +1294,13 @@
     "item_id": 29,
     "item_name": "备料策略变化说明以及后续策略",
     "detail": "进展:已提交；状态→完成；提交物:邮件"
+  },
+  {
+    "time": "2026-11-25 19:03:55",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知3人，成功3"
   }
 ]
