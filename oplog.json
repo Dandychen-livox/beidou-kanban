@@ -1446,5 +1446,13 @@
     "item_id": 34,
     "item_name": "回吸点云改善答复",
     "detail": "进展:1、回吸点云是由于光斑打到近距离高反物体后导致，由于激光雷达；状态→完成；Livox确认→完成；责任人→Karson；优先级→中"
+  },
+  {
+    "time": "2026-11-27 18:47:09",
+    "operator": "系统",
+    "action": "发送DDL提醒",
+    "item_id": null,
+    "item_name": null,
+    "detail": "通知1人，成功1"
   }
 ]
