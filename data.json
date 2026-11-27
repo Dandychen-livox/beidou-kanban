@@ -936,5 +936,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-27 01:59",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 41,
+    "date": "2026-11-27",
+    "item": "Mid-360L激励方案",
+    "submit": "",
+    "ddl": "",
+    "initiator": "Dandy",
+    "person": "周培云",
+    "livox": "Dandy",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-27 01:59",
+    "updated_by": "Dandy.chen"
   }
 ]
