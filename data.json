@@ -628,13 +628,13 @@
     "recur_note": "",
     "progress": "",
     "submit_url": "",
-    "status": "未完成",
-    "livox_confirm": "未完成",
-    "completed_at": "",
-    "status_done_at": "",
+    "status": "完成",
+    "livox_confirm": "完成",
+    "completed_at": "2026-11-27 01:53",
+    "status_done_at": "2026-11-27 01:53",
     "created_by_email": "xiaodanchen@livoxtech.com",
     "created_by": "Dandy.chen",
-    "updated_at": "2026-11-13 06:01",
+    "updated_at": "2026-11-27 01:53",
     "updated_by": "Dandy.chen"
   },
   {
