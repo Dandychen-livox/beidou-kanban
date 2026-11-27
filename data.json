@@ -801,7 +801,7 @@
     "recur_type": "",
     "recur_value": "",
     "recur_note": "",
-    "progress": "",
+    "progress": "客户未进一步反馈问题，暂无需求",
     "submit_url": "",
     "status": "挂起",
     "livox_confirm": "未完成",
@@ -809,7 +809,7 @@
     "status_done_at": "",
     "created_by_email": "lijp@ronwelltech.com",
     "created_by": "李建萍",
-    "updated_at": "2026-11-27 04:14",
+    "updated_at": "2026-11-27 04:15",
     "updated_by": "Karson.chen"
   },
   {
