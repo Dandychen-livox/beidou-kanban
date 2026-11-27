@@ -776,16 +776,16 @@
     "recur_type": "",
     "recur_value": "",
     "recur_note": "",
-    "progress": "",
+    "progress": "1、回吸点云是由于光斑打到近距离高反物体后导致，由于激光雷达原理性问题暂时无法优化\n2、后续评估通过tag进行区分/滤除的方式进行优化",
     "submit_url": "",
-    "status": "未完成",
-    "livox_confirm": "未完成",
-    "completed_at": "",
-    "status_done_at": "",
+    "status": "完成",
+    "livox_confirm": "完成",
+    "completed_at": "2026-11-27 11:36",
+    "status_done_at": "2026-11-27 11:36",
     "created_by_email": "lijp@ronwelltech.com",
     "created_by": "李建萍",
-    "updated_at": "2026-11-13 07:07",
-    "updated_by": "李建萍"
+    "updated_at": "2026-11-27 11:36",
+    "updated_by": "Karson.chen"
   },
   {
     "id": 35,
