@@ -1011,5 +1011,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-27 02:02",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 44,
+    "date": "2026-11-27",
+    "item": "约访华睿等客户沟通360L测试问题",
+    "submit": "",
+    "ddl": "2026-12-4",
+    "initiator": "Aileen",
+    "person": "赵云飞",
+    "livox": "",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "lijp@ronwelltech.com",
+    "created_by": "李建萍",
+    "updated_at": "2026-11-27 07:04",
+    "updated_by": "李建萍"
   }
 ]
