@@ -986,5 +986,30 @@
     "created_by": "Dandy.chen",
     "updated_at": "2026-11-27 02:01",
     "updated_by": "Dandy.chen"
+  },
+  {
+    "id": 43,
+    "date": "2026-11-27",
+    "item": "Mid-360S降本需求收集",
+    "submit": "Mid60S降本需求搜集：\n1、大客户提供新包装方式: 一箱30颗，整箱发货 (如果这个能跑通，就可以去掉优品CP) 。\n2、小包装参考Mid60L的包装方式做简化(只保留干燥剂和擦拭布)。\n3、是否有客户存在航插头变更线束的降本需求。",
+    "ddl": "2026-12-2",
+    "initiator": "Dandy",
+    "person": "周培云",
+    "livox": "Dandy",
+    "priority": "中",
+    "recurring": false,
+    "recur_type": "",
+    "recur_value": "",
+    "recur_note": "",
+    "progress": "",
+    "submit_url": "",
+    "status": "未完成",
+    "livox_confirm": "未完成",
+    "completed_at": "",
+    "status_done_at": "",
+    "created_by_email": "xiaodanchen@livoxtech.com",
+    "created_by": "Dandy.chen",
+    "updated_at": "2026-11-27 02:02",
+    "updated_by": "Dandy.chen"
   }
 ]
